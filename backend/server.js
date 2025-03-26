@@ -1,0 +1,58 @@
+// Charger les variables d'environnement
+require('dotenv').config();
+
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const path = require("path");
+
+const serviceRoutes = require('./routes/services');
+const bookingRoutes = require('./routes/bookings');
+const contactRoutes = require('./routes/contacts');
+const orderRoutes = require('./routes/orders');
+const providerRoutes = require('./routes/providers');
+const clientRouter = require('./routes/clients');
+
+const app = express();
+
+// 🔹 Middleware
+app.use(cors({
+    origin: 'http://localhost:3000', // URL de votre frontend
+    credentials: true
+}));
+app.use(express.json());
+app.use("/uploads", express.static("uploads"));
+MONGO_URI="mongodb+srv://hindelmoussaoui:hindelmoussaoui@cluster0.omwqk.mongodb.net/CleanCare?retryWrites=true&w=majority"
+
+// 🔹 Connexion à MongoDB
+// mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(MONGO_URI)
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => {
+    console.error('❌ Failed to connect to MongoDB', err.message);
+    process.exit(1);
+});
+
+// 🔹 Routes
+app.use('/api/services', serviceRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/contacts', contactRoutes);
+app.use('/api', orderRoutes);
+app.use('/api/providers', providerRoutes);
+app.use('/api', clientRouter);
+
+
+// 🔹 Gestion des erreurs globales
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
+// Servir les fichiers statiques depuis le dossier 'uploads'
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// 🔹 Démarrage du serveur
+const PORT = process.env.PORT || 5000; // Utiliser la variable d'environnement PORT
+app.listen(PORT, () => {
+    console.log(`🚀 Server is running on port ${PORT}`);
+}); 
