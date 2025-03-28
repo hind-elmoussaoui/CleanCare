@@ -30,7 +30,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Route pour récupérer tous les clients
-router.get('/clients', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
         const clients = await Client.find(); // Utilisez `find` pour récupérer tous les clients
         res.status(200).json(clients);
@@ -90,18 +90,23 @@ router.post('/login', async (req, res) => {
     }
   });
 
+// Ajoutez cette route pour récupérer les données du client connecté
 router.get('/me', async (req, res) => {
     try {
         const token = req.headers.authorization?.split(' ')[1];
         if (!token) return res.status(401).json({ message: "Non autorisé" });
         
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, "votreSecretKey");
         const client = await Client.findById(decoded.id).select('-password');
         
         if (!client) return res.status(404).json({ message: "Client non trouvé" });
         
-        res.json(client);
+        res.json({
+            ...client._doc,
+            role: 'client' // Ajoutez explicitement le rôle
+        });
     } catch (error) {
+        console.error("Erreur:", error);
         res.status(500).json({ message: "Erreur serveur" });
     }
 });

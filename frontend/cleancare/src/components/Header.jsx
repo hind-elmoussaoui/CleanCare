@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import logo from "../assets/CleanCare.png";
 import { Link } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserAlt } from "react-icons/fa";
 
 function Header() {
     const [bgColor, setBgColor] = useState("bg-transparent");
@@ -59,9 +59,9 @@ function Header() {
                     <li> 
                         <Link 
                         to="/signin"
-                        className="text-white hover:text-[#719be5] flex items-center justify-center"
+                        className="text-[#ed117f] hover:text-[#719be5] flex items-center justify-center border-1 rounded-full w-10 h-7 border-[#ed117f] hover:border-[#719be5] "
                         >
-                            <FaUserCircle  className="text-2xl"/>
+                            <FaUserAlt className="text-xl"/>
                         </Link>
                     </li>
                 </ul>
@@ -81,9 +81,9 @@ function Header() {
                         <li className="md:hidden">
                             <Link 
                             to="/signin"
-                            className="text-white hover:text-[#719be5] flex items-center justify-center space-x-2"
+                            className="text-[#ed117f] hover:text-[#719be5] flex items-center justify-center space-x-2"
                             >
-                                <FaUserCircle className="text-2xl" /> 
+                                <FaUserAlt className="text-xl" /> 
                                 <span>Connexion</span> 
                             </Link>
                         </li>

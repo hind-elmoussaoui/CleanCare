@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
@@ -25,10 +25,13 @@ import LoginProvider from "./components/LoginProvider";
 import ProviderDashboard from "./components/ProviderDashboard";
 import ClientDashboard from "./components/ClientDashboard";
 import SignUp from "./components/SignUp";
-import Interface from "./pages/Interface";
+import Interface from "./components/LoginPage";
+import ProviderInterface from "./pages/ProviderInterface";
+import ClientInterface from "./pages/ClientInterface";
 // import SignUp from "./components/SignUp";
 
 function App() {
+
   return (
     <Router>
       <AppContent />
@@ -74,7 +77,29 @@ function AppContent() {
           <Route path="/login" element={<Login />} />
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route path="/Interface" element={<Interface />} />
+          <Route path="/ClientInterface" element={<ClientInterface />} />
+          <Route path="/ProviderInterface" element={<ProviderInterface />} />
+          <Route 
+  path="/Interface" 
+  element={
+    localStorage.getItem('token') ? (
+      // Vérifier le type d'utilisateur
+      JSON.parse(localStorage.getItem('userData'))?.role === 'provider' ? (
+        <ProviderInterface 
+          userData={location.state?.userData || JSON.parse(localStorage.getItem('userData'))} 
+        />
+      ) : (
+        <ClientInterface 
+          userData={location.state?.userData || JSON.parse(localStorage.getItem('userData'))} 
+        />
+      )
+    ) : (
+      <Navigate to="/LoginPage" />
+    )
+  } 
+/>
+          {/* <Route path="/interface" element={ isAuthenticated ? <Interface userType={userType} /> : <Navigate to="/signin" /> } />
+          <Route path="/" element={ isAuthenticated ? <Navigate to="/interface" /> : <Navigate to="/signin" /> } /> */}
 
 {/* <Route path="/signup-prestataire" element={<SignUpPrestataire />} /> */}
           {/* <Route path="/signup" element={<SignUp />} /> */}

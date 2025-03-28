@@ -1,213 +1,141 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaCog, FaSignOutAlt, FaUser, FaLanguage } from "react-icons/fa";
+import ClientInterface from "./ClientInterface";
+import ProviderInterface from "./ProviderInterface";
 
-function Interface() {
-    const [showSettings, setShowSettings] = useState(false);
-    const [language, setLanguage] = useState("fr");
+export default function Interface() {
     const navigate = useNavigate();
     const location = useLocation();
     const [userData, setUserData] = useState(null);
+    const [userRole, setUserRole] = useState(null);
     const [loading, setLoading] = useState(true);
-    
-    // Détermine si l'utilisateur est un prestataire
-    const isProvider = userData?.services !== undefined;
+    const [error, setError] = useState(null);
 
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userData');
-        navigate("/");
+    const fetchUserData = async () => {
+        try {
+            setError(null);
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                navigate("/LoginPage");
+                return;
+            }
+
+            // Décodage du token pour obtenir le rôle
+            let decoded;
+            try {
+                decoded = JSON.parse(atob(token.split('.')[1]));
+                setUserRole(decoded.role);
+            } catch (e) {
+                console.error("Erreur de décodage du token:", e);
+                localStorage.removeItem('token');
+                navigate("/LoginPage");
+                return;
+            }
+
+            // Récupération des données utilisateur selon le rôle
+            const endpoint = decoded.role === 'provider' 
+                ? "http://localhost:5000/api/providers/me" 
+                : "http://localhost:5000/api/clients/me";
+
+            const response = await fetch(endpoint, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erreur ${response.status}`);
+            }
+
+            const data = await response.json();
+            setUserData(data);
+            localStorage.setItem('userData', JSON.stringify(data));
+            localStorage.setItem('userType', decoded.role);
+
+        } catch (error) {
+            console.error("Erreur:", error);
+            setError("Impossible de charger les données utilisateur");
+            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
+            navigate("/LoginPage");
+        } finally {
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                // Tentative 1: Données depuis la navigation
-                if (location.state?.userData) {
-                    setUserData(location.state.userData);
-                    localStorage.setItem('userData', JSON.stringify(location.state.userData));
-                    setLoading(false);
-                    return;
-                }
+        // Vérification initiale des données
+        const checkAuth = () => {
+            const token = localStorage.getItem('token');
+            const savedData = localStorage.getItem('userData');
 
-                // Tentative 2: Données depuis localStorage
-                const savedData = localStorage.getItem('userData');
-                if (savedData) {
-                    setUserData(JSON.parse(savedData));
-                    setLoading(false);
-                    return;
-                }
-
-                // Tentative 3: Récupération depuis l'API
-                const token = localStorage.getItem('token');
-                if (!token) {
-                    navigate("/");
-                    return;
-                }
-
-                const response = await fetch("http://localhost:5000/api/providers/me", {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setUserData(data);
-                    localStorage.setItem('userData', JSON.stringify(data));
-                } else {
-                    navigate("/");
-                }
-            } catch (error) {
-                console.error("Error fetching user data:", error);
-                navigate("/");
-            } finally {
-                setLoading(false);
+            if (!token) {
+                navigate("/LoginPage");
+                return;
             }
+
+            if (location.state?.userData) {
+                setUserData(location.state.userData);
+                setUserRole(location.state.userData.role || 'client');
+                setLoading(false);
+                return;
+            }
+
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                setUserData(parsedData);
+                setUserRole(parsedData.role || 'client');
+                setLoading(false);
+                return;
+            }
+
+            fetchUserData();
         };
 
-        fetchUserData();
+        checkAuth();
     }, [location, navigate]);
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center">
                 <div className="text-center">
-                    <h2 className="text-2xl font-bold mb-4">Chargement de votre espace...</h2>
-                    <p>Si le chargement persiste, veuillez rafraîchir la page</p>
+                    <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" role="status">
+                        <span className="visually-hidden">Chargement...</span>
+                    </div>
+                    <p className="mt-2">Chargement de votre interface...</p>
                 </div>
             </div>
         );
     }
 
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md">
+                    <strong className="font-bold">Erreur ! </strong>
+                    <span className="block sm:inline">{error}</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Protection des routes selon le rôle
+    if (userRole === 'provider') {
+        return <ProviderInterface userData={userData} />;
+    }
+
+    if (userRole === 'client') {
+        return <ClientInterface userData={userData} />;
+    }
+
+    // Cas par défaut (normalement ne devrait pas arriver)
     return (
-        <div className="min-h-screen bg-gray-100">
-            {/* Header */}
-            <header className="bg-blue-500 text-white p-4 shadow-md">
-                <div className="container mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl font-bold">
-                        {isProvider ? "Espace Prestataire" : "Espace Client"}
-                    </h1>
-                    <div className="relative">
-                        <button 
-                            onClick={() => setShowSettings(!showSettings)}
-                            className="flex items-center space-x-2 bg-white/20 p-2 rounded-full hover:bg-white/30 transition"
-                        >
-                            <FaCog className="text-xl" />
-                            <FaUser className="text-xl" />
-                        </button>
-                        
-                        {showSettings && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                                <button 
-                                    onClick={() => setLanguage(language === "fr" ? "en" : "fr")}
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
-                                >
-                                    <FaLanguage className="mr-2" />
-                                    {language === "fr" ? "Switch to English" : "Passer en Français"}
-                                </button>
-                                <button 
-                                    onClick={handleLogout}
-                                    className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 w-full text-left"
-                                >
-                                    <FaSignOutAlt className="mr-2" />
-                                    Déconnexion
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content */}
-            <main className="container mx-auto p-4">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-6">Mes Informations</h2>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Section Informations Personnelles (commune aux deux types) */}
-                        <div className="border rounded-lg p-4">
-                            <h3 className="font-medium text-lg mb-4">Informations Personnelles</h3>
-                            <div className="space-y-3">
-                                <p><span className="font-medium">Nom:</span> {userData.lastName || "Non renseigné"}</p>
-                                <p><span className="font-medium">Prénom:</span> {userData.firstName || "Non renseigné"}</p>
-                                <p><span className="font-medium">Email:</span> {userData.email || "Non renseigné"}</p>
-                                <p><span className="font-medium">Téléphone:</span> {userData.phone || "Non renseigné"}</p>
-                                {isProvider && (
-                                    <>
-                                        {userData.address && <p><span className="font-medium">Adresse:</span> {userData.address}</p>}
-                                        {userData.city && <p><span className="font-medium">Ville:</span> {userData.city}</p>}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Section spécifique selon le type d'utilisateur */}
-                        {isProvider ? (
-                            // Section pour les prestataires
-                            <div className="border rounded-lg p-4">
-                                <h3 className="font-medium text-lg mb-4">Informations Professionnelles</h3>
-                                <div className="space-y-3">
-                                    <p><span className="font-medium">Service:</span> {userData.services || "Non renseigné"}</p>
-                                    <p><span className="font-medium">Expérience:</span> {userData.experience || "0"} ans</p>
-                                    <p><span className="font-medium">CIN:</span> {userData.idCard || "Non renseigné"}</p>
-                                    <p><span className="font-medium">Statut:</span> {userData.status || "En attente de validation"}</p>
-                                </div>
-                            </div>
-                        ) : (
-                            // Section pour les clients
-                            <div className="border rounded-lg p-4">
-                                <h3 className="font-medium text-lg mb-4">Préférences</h3>
-                                <div className="space-y-3">
-                                    <p><span className="font-medium">Type de client:</span> Particulier</p>
-                                    <p><span className="font-medium">Membre depuis:</span> {new Date().toLocaleDateString()}</p>
-                                    <p><span className="font-medium">Services favoris:</span> Aucun pour le moment</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Photo de profil (uniquement pour prestataires) */}
-                    {isProvider && userData.photo && (
-                        <div className="mt-6 border rounded-lg p-4">
-                            <h3 className="font-medium text-lg mb-4">Photo de Profil</h3>
-                            <img 
-                                src={typeof userData.photo === "string" ? userData.photo : URL.createObjectURL(userData.photo)} 
-                                alt="Profil" 
-                                className="w-32 h-32 rounded-full object-cover"
-                            />
-                        </div>
-                    )}
-
-                    {/* Section actions spécifiques */}
-                    <div className="mt-6 border rounded-lg p-4">
-                        <h3 className="font-medium text-lg mb-4">Actions</h3>
-                        <div className="flex flex-wrap gap-4">
-                            {isProvider ? (
-                                <>
-                                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                        Modifier mon profil
-                                    </button>
-                                    <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-                                        Voir mes demandes
-                                    </button>
-                                </>
-                            ) : (
-                                <>
-                                    <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
-                                        Trouver un prestataire
-                                    </button>
-                                    <button className="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">
-                                        Mes réservations
-                                    </button>
-                                </>
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </main>
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded relative max-w-md">
+                <strong className="font-bold">Attention ! </strong>
+                <span className="block sm:inline">Type d'utilisateur non reconnu</span>
+            </div>
         </div>
     );
 }
-
-export default Interface;

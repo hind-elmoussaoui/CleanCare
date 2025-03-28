@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import logo from "../assets/CleanCare.png";
 import { Link } from "react-router-dom";
-import { FaUserCircle } from "react-icons/fa";
+import { FaUserAlt } from "react-icons/fa";
 
 function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -30,10 +30,8 @@ function Navbar() {
                         <li><Link to="/contact" className="hover:text-[#719be5]">CONTACT</Link></li>
                         <li> 
                             <Link 
-                            to="/signin"
-                            className="text-white hover:text-[#719be5] flex items-center justify-center"
-                            >
-                                <FaUserCircle  className="text-2xl"/>
+                            to="/signin" className="text-[#ed117f] hover:text-[#719be5] flex items-center justify-center border-1 rounded-full w-10 h-7 border-[#ed117f] hover:border-[#719be5] ">
+                                <FaUserAlt className="text-xl"/>
                             </Link>
                         </li>
                     </ul>
@@ -49,11 +47,10 @@ function Navbar() {
                             <li><Link to="/contact" className="hover:text-[#719be5]" onClick={() => setIsOpen(false)}>CONTACT</Link></li>
                             <li className="md:hidden">
                                 <Link 
-                                to="/signin"
-                                className="text-white hover:text-[#719be5] flex items-center justify-center space-x-2"
+                                to="/signin" className="text-[#ed117f] hover:text-[#719be5] flex items-center justify-center space-x-2"
                                 >
-                                    <FaUserCircle className="text-2xl" />
-                                    <span>Connexion</span>
+                                    <FaUserAlt className="text-xl" /> 
+                                    <span>Connexion</span> 
                                 </Link>
                             </li>
                         </ul>

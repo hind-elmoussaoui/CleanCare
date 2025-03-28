@@ -16,10 +16,7 @@ const clientRouter = require('./routes/clients');
 const app = express();
 
 // 🔹 Middleware
-app.use(cors({
-    origin: 'http://localhost:3000', // URL de votre frontend
-    credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 MONGO_URI="mongodb+srv://hindelmoussaoui:hindelmoussaoui@cluster0.omwqk.mongodb.net/CleanCare?retryWrites=true&w=majority"
@@ -39,7 +36,7 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api', orderRoutes);
 app.use('/api/providers', providerRoutes);
-app.use('/api', clientRouter);
+app.use('/api/clients', clientRouter);
 
 
 // 🔹 Gestion des erreurs globales

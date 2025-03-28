@@ -47,7 +47,7 @@ function SignUpClient() {
         }
 
         try {
-            const response = await fetch("http://localhost:5000/api/register", {
+            const response = await fetch("http://localhost:5000/api/clients/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
@@ -56,6 +56,10 @@ function SignUpClient() {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'client');
+
+                // Stockez également les données du client
+                localStorage.setItem('userData', JSON.stringify(data.client));
 
                 alert("Inscription réussie !");
                 navigate("/Interface", { state: { userData: data.client // ou autre champ d'identification de l'API

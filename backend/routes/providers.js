@@ -134,37 +134,23 @@ router.get("/", async (req, res) => {
     }
 });
 
-// Route pour obtenir les détails d'un fournisseur
-router.get("/me", async (req, res) => {
-    try { 
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ message: "Token non fourni" });
-        }
-
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const provider = await Provider.findById(decoded.id).select("-password");
-
-        if (!provider) {
-            return res.status(404).json({ message: "Prestataire non trouvé" });
-        }
-
-        // Retourner toutes les infos nécessaires pour l'interface
-        res.status(200).json({
-            firstName: provider.firstName,
-            lastName: provider.lastName,
-            email: provider.email,
-            phone: provider.phone,
-            address: provider.address,
-            city: provider.city,
-            services: provider.services,
-            experience: provider.experience,
-            idCard: provider.idCard,
-            status: provider.status,
-            photo: provider.photo
+// Route pour récupérer les données du prestataire connecté
+router.get('/me', async (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) return res.status(401).json({ message: "Non autorisé" });
+        
+        const decoded = jwt.verify(token, "votreSecretKey");
+        const provider = await Provider.findById(decoded.id).select('-password');
+        
+        if (!provider) return res.status(404).json({ message: "Prestataire non trouvé" });
+        
+        res.json({
+            ...provider._doc,
+            role: 'provider' // Ajoutez explicitement le rôle
         });
     } catch (error) {
-        console.error("Erreur lors de la récupération des données :", error);
+        console.error("Erreur:", error);
         res.status(500).json({ message: "Erreur serveur" });
     }
 });

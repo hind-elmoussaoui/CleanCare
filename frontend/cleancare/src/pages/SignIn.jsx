@@ -5,73 +5,42 @@ import { FcGoogle } from 'react-icons/fc';
 import Image from "../assets/joel.jpg";
 
 function SignIn() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value});
+  };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
-  
-    try {
-      console.log("Tentative de connexion avec:", { email, password });
+    setError("");
 
+    try {
       const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(formData),
       });
-  
-      console.log("Réponse du serveur:", response.status);
       
-      // Vérifiez si la réponse est JSON
-      const contentType = response.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/json')) {
-        const text = await response.text();
-        console.error("Réponse non-JSON:", text);
-        throw new Error('Le serveur a renvoyé une réponse inattendue');
-      }
-  
       const data = await response.json();
-      console.log("Données reçues:", data);
-  
+
       if (!response.ok) {
-        throw new Error(data.message || 'Échec de la connexion');
-      }
-  
-      console.log("Connexion réussie, récupération des données utilisateur...");
-      const clientResponse = await fetch('http://localhost:5000/api/me', {
-        headers: {
-          'Authorization': `Bearer ${data.token}`
-        }
-      });
-  
-      console.log("Réponse données utilisateur:", clientResponse.status);
-      
-      if (!clientResponse.ok) {
-        throw new Error('Échec de la récupération des données utilisateur');
-      }
-  
-      const clientData = await clientResponse.json();
-      console.log("Données utilisateur:", clientData);
-      
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userData', JSON.stringify(clientData));
-      navigate('/Interface', { state: { userData: clientData } });
-  
-    } catch (err) {
-      console.error("Erreur complète:", err);
-      setError(err.message.includes('<!DOCTYPE html>') 
-        ? 'Erreur serveur - Vérifiez la console pour plus de détails' 
-        : err.message);
-    } finally {
-      setLoading(false);
-    }
+      localStorage.setItem('userType', data.userType);
+        navigate("/interface");
+      }
+    
+    } catch (error) {
+      console.error("Erreur :", error);
+      setError("Une erreur est survenue");
+    } 
   };
 
   return (
@@ -120,24 +89,24 @@ function SignIn() {
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+        {error && 
+          <p className="mb-4 p-2 bg-red-100 text-red-700 rounded">
             {error}
-          </div>
-        )}
+          </p>
+        }
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="mb-4">
             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
               E-mail
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="email"
+              name="email"
               type="email"
               placeholder="E-mail"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={handleChange}
               required
             />
           </div>
@@ -148,11 +117,11 @@ function SignIn() {
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
+              name="password"
               type="password"
               placeholder="Mot de passe"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={FormData.password}
+              onChange={handleChange}
               required
             />
           </div>
@@ -168,9 +137,7 @@ function SignIn() {
             <button
               className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-2 rounded focus:outline-none focus:shadow-outline w-full"
               type="submit"
-              disabled={loading}
-            >
-              {loading ? 'Connexion en cours...' : 'CONNEXION'}
+            >Se connecter
             </button>
           </div>
 

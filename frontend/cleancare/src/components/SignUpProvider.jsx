@@ -61,9 +61,13 @@ function SignUpProvider() {
 
         try {
             const formDataToSend = new FormData();
-            for (const key in formData) {
-                formDataToSend.append(key, formData[key]);
-            }
+
+            // Ajoutez tous les champs sauf confirmPassword
+            Object.keys(formData).forEach(key => {
+                if (key !== 'confirmPassword' && formData[key] !== null) {
+                    formDataToSend.append(key, formData[key]);
+                }
+            });
 
             const response = await fetch("http://localhost:5000/api/providers/register", {
                 method: "POST",
@@ -73,15 +77,21 @@ function SignUpProvider() {
             const data = await response.json();
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('userType', 'provider');
+                
+                // Stockez également les données de l'utilisateur si nécessaire
+                localStorage.setItem('userData', JSON.stringify(data.provider));
+    
 
                 alert("Inscription réussie !");
-                navigate("/Interface", { state: { userData: {...data.provider,} } });
+                navigate("/Interface", { state: { userData: data.provider } });
             } else {
-                setErrors(data.errors || []);
+                setErrors(data.errors || [{ message: data.message || "Erreur lors de l'inscription" }]);
                 alert(`Erreur : ${data.message || "Problème inconnu"}`);
             }
         } catch (error) {
             console.error("Erreur :", error);
+            setErrors([{ message: "Erreur de connexion au serveur" }]);
             alert("Une erreur est survenue.");
         }
     };
