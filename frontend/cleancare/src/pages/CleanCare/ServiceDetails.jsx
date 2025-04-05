@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import "../index.css";
+import "../../index.css";
 
 export default function ServiceDetails() {
     const location = useLocation();

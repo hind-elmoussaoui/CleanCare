@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import logo from "../assets/CleanCare.png";
+import logo from "../../assets/CleanCare.png";
 import { Link } from "react-router-dom";
 import { FaUserAlt } from "react-icons/fa";
 
@@ -18,9 +18,9 @@ function Header() {
     useEffect(() => {
         const handleScroll = () => {
             if (window.scrollY > 50) {
-                setBgColor("bg-[#a4bde7] shadow-lg transition-all duration-300");
+                setBgColor("bg-[#a4bde7] text-[#0071bc] shadow-lg transition-all duration-300");
             } else {
-                setBgColor("bg-transparent transition-all duration-300");
+                setBgColor("bg-transparent text-white transition-all duration-300");
             }
         };
 
@@ -32,7 +32,7 @@ function Header() {
 
     return (
         <header className={`fixed w-full z-50 p-1 ${bgColor}`}>
-            <nav className="flex justify-between items-center text-white px-6">
+            <nav className="flex justify-between items-center px-6">
                 {/* Logo centré sur mobile */}
                 <div className="flex items-center gap-2">
                     <img src={logo} alt="Logo" className="w-20 h-20 md:w-25 md:h-23" />

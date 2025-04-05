@@ -38,7 +38,7 @@ const PricingSection = () => {
     return (
         <section className="py-12 bg-blue-300/30">
             <div className="max-w-6xl mx-auto text-center px-4">
-                <h2 className="text-3xl font-bold text-blue-700 mb-8">
+                <h2 className="text-3xl font-bold text-[#0071bc] mb-8">
                     Nos offres pour les femmes de ménage et les nounous
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -47,7 +47,7 @@ const PricingSection = () => {
                             key={index}
                             className={`relative p-7 flex flex-col justify-between rounded-lg shadow-md ${
                                 plan.name === "Pack Premium"
-                                    ? "bg-red-500 text-white translate-y-[-10px]"
+                                    ? "bg-[#9e588b] text-white translate-y-[-10px]"
                                     : "mb-5 bg-white cursor-pointer transition-transform duration-300 hover:scale-105"
                             }`}
                         >
@@ -78,8 +78,8 @@ const PricingSection = () => {
                                 }
                                 className={`py-2 w-full text-white font-semibold uppercase rounded-lg ${
                                     plan.buttonColor === "yellow"
-                                        ? "bg-yellow-400 hover:bg-yellow-500"
-                                        : "bg-red-500 hover:bg-red-600"
+                                        ? "bg-[#d15cb1] hover:bg-[#b565a0]"
+                                        : "bg-[#9e588b] hover:bg-[#d15cb1]"
                                 } transition duration-300`}
                             >
                                 Commander maintenant

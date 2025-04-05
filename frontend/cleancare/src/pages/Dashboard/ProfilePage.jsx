@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from '../components/Sidebar';
-import Image from '../assets/menage.jpg';
+import Sidebar from '../../components/Dashboard/Sidebar';
+import Image from '../../assets/menage.jpg';
 
 function ProfilePage() {
   return (

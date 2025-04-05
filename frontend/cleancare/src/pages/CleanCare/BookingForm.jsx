@@ -7,7 +7,7 @@ const servicesData = [
     { id: 2, name: "Garde d’enfants", description: "Une nounou qualifiée pour vos enfants.", price: "200" },
     { id: 3, name: "Ménage de bureaux", description: "Entretien et propreté de votre espace de travail.", price: "250" },
     { id: 4, name: "Garde de nuit", description: "Une assistance pour la nuit pour vos enfants.", price: "300" },
-    { id: 5, name: "Ménage après déménagement", description: "Nettoyage après un départ ou une arrivée.", price: "350" },
+    { id: 5, name: "Ménage en profondeur", description: "Nettoyage après un départ ou une arrivée.", price: "350" },
     { id: 6, name: "Baby-sitting week-end", description: "Garde de vos enfants le week-end.", price: "180" },
 ];
 

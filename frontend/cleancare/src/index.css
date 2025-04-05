@@ -33,7 +33,7 @@
 }
 
 .flip-card-front {
-    background-color: #a4bde7; /* Bleu clair */
+    background-color: #e09998; /* Bleu clair */
 }
 
 .flip-card-back {
@@ -85,7 +85,7 @@
 }
 
 .flip-card-back a {
-    background-color: #a4bde7;
+    background-color: #e09998;
     color: white;
     padding: 8px 16px;
     border-radius: 5px;

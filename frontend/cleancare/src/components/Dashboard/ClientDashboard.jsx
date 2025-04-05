@@ -45,6 +45,7 @@ const ClientDashboard = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-pink-50 to-purple-50">
+      <Sidebar />
       <div className="max-w-2xl w-full bg-white p-6 shadow-lg rounded-xl border-2 border-pink-200">
         <h2 className="text-2xl font-bold text-center text-gray-700 mb-6">Tableau de Bord Client</h2>
         

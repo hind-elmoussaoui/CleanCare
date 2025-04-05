@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaUser, FaEnvelope, FaComment, FaCalendar, FaCog, FaBook } from 'react-icons/fa';
-import Sidebar from '../components/Sidebar';
+import Sidebar from '../../components/Dashboard/Sidebar';
 
 const Messages = () => {
     const [messages, setMessages] = useState([]); // État pour stocker les messages

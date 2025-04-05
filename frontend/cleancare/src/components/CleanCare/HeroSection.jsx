@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Importer useNavigate
-import image1 from "../assets/m.jpg";
-import image2 from "../assets/be.jpg";
-import image3 from "../assets/image.jpg";
-import image4 from "../assets/n.jpg";
+import image1 from "../../assets/m.jpg";
+import image2 from "../../assets/be.jpg";
+import image3 from "../../assets/image.jpg";
+import image4 from "../../assets/n.jpg";
 import Button from './Button'; // Importer le bouton 3D
 
 const backgroundImages = [image1, image2, image3, image4];

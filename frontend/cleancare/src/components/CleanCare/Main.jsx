@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import { ShieldCheck, Baby, Sparkles, Users} from "lucide-react";
 import { FaBroom, FaChild, FaShieldAlt } from "react-icons/fa";
-import backgroundImage from "../assets/image_01-4.jpg";
-import Image from "../assets/pour.jpg";
+import backgroundImage from "../../assets/image_01-4.jpg";
+import Image from "../../assets/pour.jpg";
+import { useNavigate } from 'react-router-dom';
 
 const services = [
     {
@@ -32,6 +33,7 @@ const services = [
 ];
 
 function Main() {
+    const navigate = useNavigate();
 
     const points = [
         {
@@ -61,6 +63,10 @@ function Main() {
     ];
 
     const [selectedService, setSelectedService] = useState("menage");
+
+    const handleLearnMore = () => {
+        navigate("/en-savoir-plus");
+    };
 
     return (
         <div>
@@ -108,7 +114,7 @@ function Main() {
         </div>
         </div>
 
-        <button className="mt-8 px-6 py-3 bg-[#ed117f] hover:bg-[#d10c6a] text-white font-semibold rounded-lg shadow-md transition duration-300">
+        <button onClick={handleLearnMore} className="mt-8 px-6 py-3 bg-[#ed117f] hover:bg-[#d10c6a] text-white font-semibold rounded-lg shadow-md transition duration-300">
             En savoir plus
         </button>
     </div>

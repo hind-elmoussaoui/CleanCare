@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { FaPhone, FaEnvelope, FaMapMarkerAlt } from "react-icons/fa";
 import "leaflet/dist/leaflet.css";
-import Maps from "../components/Maps";
+import Maps from "../../components/CleanCare/Maps";
 
 export default function ContactForm() {
     // États pour les champs du formulaire
@@ -44,7 +44,9 @@ export default function ContactForm() {
     return (
         <div className="sticky flex-grow flex flex-col items-center w-full">
             {/* Section Carte */}
+            <div className="w-full h-70">
             <Maps />
+            </div>
 
             {/* Section Formulaire */}
             <div className="flex flex-wrap gap-15 items-center justify-center p-4 bg-white">

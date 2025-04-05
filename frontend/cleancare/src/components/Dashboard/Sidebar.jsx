@@ -7,7 +7,7 @@ function Sidebar() {
   const [isOpen, setIsOpen] = useState(true);
 
   const handleLogout = () => {
-    localStorage.removeItem("adminPassword");
+    localStorage.removeItem("isAdminAuthenticated");
     navigate("/login");
   };
 

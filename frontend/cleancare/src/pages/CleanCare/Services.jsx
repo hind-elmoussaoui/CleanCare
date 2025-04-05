@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaHome, FaChild, FaBuilding, FaMoon, FaBoxes, FaBaby } from "react-icons/fa"; 
-import "../index.css";
-import image_01 from "../assets/m.jpg";
-import image_02 from "../assets/be.jpg";
-import image_03 from "../assets/image.jpg";
-import image_04 from "../assets/n.jpg";
+import "../../index.css";
+import image_01 from "../../assets/m.jpg";
+import image_02 from "../../assets/be.jpg";
+import image_03 from "../../assets/image.jpg";
+import image_04 from "../../assets/n.jpg";
 
 const backgroundImages = [image_01, image_02, image_03, image_04];
 

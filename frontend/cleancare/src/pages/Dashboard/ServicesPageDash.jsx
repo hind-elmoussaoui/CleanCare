@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../../components/Dashboard/Sidebar";
 
 const ServicesPage = () => {
   const [services, setServices] = useState({ data: [] });

@@ -3,11 +3,11 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import { Navigation, Pagination, Autoplay } from "swiper/modules";
-import Image1 from "../assets/menage.jpg"; 
-import Image2 from "../assets/kampus.jpg"; 
-import Image3 from "../assets/drew-9462345.jpg";
-import Image4 from "../assets/tima.jpg";
-import Image5 from "../assets/pexels.jpg"; 
+import Image1 from "../../assets/menage.jpg"; 
+import Image2 from "../../assets/kampus.jpg"; 
+import Image3 from "../../assets/drew-9462345.jpg";
+import Image4 from "../../assets/tima.jpg";
+import Image5 from "../../assets/pexels.jpg"; 
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa"; // Pour les flèches
 import { useState, useEffect } from "react"; // Pour gérer le slogan dynamique et l'animation
 

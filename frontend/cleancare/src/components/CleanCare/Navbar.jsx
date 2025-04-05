@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import logo from "../assets/CleanCare.png";
+import logo from "../../assets/CleanCare.png";
 import { Link } from "react-router-dom";
 import { FaUserAlt } from "react-icons/fa";
 
@@ -7,7 +7,7 @@ function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     
     return (
-            <nav className={`sticky top-0 left-0 w-full z-50 p-1 transition-all duration-500 bg-[#bfcee8]`}>
+            <nav className={`sticky top-0 left-0 w-full z-50 p-1 transition-all duration-500 bg-[#a4bde7]`}>
                 <div className="flex justify-between items-center text-white px-6">
                     {/* Logo */}
                     <div className="flex items-center gap-2">
