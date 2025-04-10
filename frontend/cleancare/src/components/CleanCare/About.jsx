@@ -19,13 +19,13 @@ const About = () => {
                     {/* Section des Images */}
                     <div className="grid md:grid-cols-2 gap-6 p-10">
                         {/* Colonne gauche (2 images en colonne) */}
-                        <div className="md:col-span-1 flex flex-col space-y-4">
-                            <img src={Image1} alt="Service 1" className="rounded-lg shadow-md" />
-                            <img src={Image2} alt="Service 2" className="rounded-lg shadow-md" />
+                        <div className="md:col-span-1 flex flex-col space-y-4.5">
+                            <img src={Image1} alt="Service 1" className="shadow-md" />
+                            <img src={Image2} alt="Service 2" className="shadow-md" />
                         </div>
                         {/* Image grande à droite */}
                         <div>
-                            <img src={Image3} alt="Service 3" className="rounded-lg shadow-md w-full h-full object-cover" />
+                            <img src={Image3} alt="Service 3" className=" shadow-md w-full h-90 object-cover" />
                         </div>
                     </div>
                     {/* Section du Texte */}

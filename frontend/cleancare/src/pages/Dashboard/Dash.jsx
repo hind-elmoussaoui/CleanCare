@@ -10,9 +10,14 @@ function Dash() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAdminAuthenticated");
-    if (!isAuthenticated) {
-      navigate("/login");
+    const token = localStorage.getItem("token");
+    const userType = localStorage.getItem("userType");
+
+    console.log("Token:", token);
+    console.log("User Type:", userType);
+
+    if (!token || !userType) {
+      navigate("/signin");
     }
   }, [navigate]);
 

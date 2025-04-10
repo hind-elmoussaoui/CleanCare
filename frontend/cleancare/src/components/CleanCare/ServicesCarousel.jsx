@@ -3,9 +3,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image1 from "../../assets/me.jpg";
 import Image2 from "../../assets/n.jpg";
 import Image3 from "../../assets/fem.jpg";
-import Image4 from "../../assets/nono.jpg";
+import Image4 from "../../assets/pexels.jpg";
 import Image5 from "../../assets/netoi.jpg";
-import Image6 from "../../assets/pour.jpg";
+import Image6 from "../../assets/nounou.jpg";
 
 const services = [
   {

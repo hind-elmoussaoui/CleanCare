@@ -8,7 +8,7 @@ function Sidebar() {
 
   const handleLogout = () => {
     localStorage.removeItem("isAdminAuthenticated");
-    navigate("/login");
+    navigate("/signin");
   };
 
   return (
@@ -24,49 +24,49 @@ function Sidebar() {
       <nav className="mt-4">
         <ul>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin" className="flex items-center">
+            <Link to="/admin/dashboard" className="flex items-center">
               <FiHome className="mr-3 text-lg" />
               {isOpen && <span>Dashboard</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/profile" className="flex items-center">
+            <Link to="/admin/dashboard/profile" className="flex items-center">
               <FiUser className="mr-3 text-lg" />
               {isOpen && <span>Profile</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/add" className="flex items-center">
+            <Link to="/admin/dashboard/add" className="flex items-center">
               <FiPlusSquare className="mr-3 text-lg" />
               {isOpen && <span>Add</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/orders" className="flex items-center">
+            <Link to="/admin/dashboard/orders" className="flex items-center">
               <FiClipboard className="mr-3 text-lg" />
               {isOpen && <span>Order</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/users" className="flex items-center">
+            <Link to="/admin/dashboard/users" className="flex items-center">
               <FiUsers className="mr-3 text-lg" />
               {isOpen && <span>Utilisateurs</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/services" className="flex items-center">
+            <Link to="/admin/dashboard/services" className="flex items-center">
               <FiShoppingCart className="mr-3 text-lg" /> 
               {isOpen && <span>Services</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/messages" className="flex items-center">
+            <Link to="/admin/dashboard/messages" className="flex items-center">
               <FiMessageSquare className="mr-3 text-lg" /> 
               {isOpen && <span>Messages</span>}
             </Link>
           </li>
           <li className="p-3 hover:bg-purple-700">
-            <Link to="/admin/settings" className="flex items-center">
+            <Link to="/admin/dashboard/settings" className="flex items-center">
               <FiSettings className="mr-3 text-lg" />
               {isOpen && <span>Paramètres</span>}
             </Link>

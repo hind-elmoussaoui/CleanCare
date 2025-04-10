@@ -6,18 +6,21 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require("path");
 
-const serviceRoutes = require('./routes/services');
-const bookingRoutes = require('./routes/bookings');
-const contactRoutes = require('./routes/contacts');
-const orderRoutes = require('./routes/orders');
-const providerRoutes = require('./routes/providers');
-const clientRouter = require('./routes/clients');
+const serviceRoutes = require('./routes/servicesRoutes');
+const bookingRoutes = require('./routes/bookingsRoutes');
+const contactRoutes = require('./routes/contactsRoutes');
+const orderRoutes = require('./routes/ordersRoutes');
+const providerRoutes = require('./routes/providersRoutes');
+const clientRouter = require('./routes/clientsRoutes');
+const adminRoutes = require('./routes/adminsRoutes');
+const usersRoutes = require('./routes/userRoutes');
 
 const app = express();
 
 // 🔹 Middleware
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 app.use("/uploads", express.static("uploads"));
 MONGO_URI="mongodb+srv://hindelmoussaoui:hindelmoussaoui@cluster0.omwqk.mongodb.net/CleanCare?retryWrites=true&w=majority"
 
@@ -37,7 +40,8 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api', orderRoutes);
 app.use('/api/providers', providerRoutes);
 app.use('/api/clients', clientRouter);
-
+app.use('/api/admin', adminRoutes);
+app.use('/api/users', usersRoutes);
 
 // 🔹 Gestion des erreurs globales
 app.use((err, req, res, next) => {
