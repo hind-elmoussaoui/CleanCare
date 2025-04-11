@@ -142,21 +142,40 @@ const upload = multer({
 });
  
 
-router.post("/profile", async (req, res) => {
+router.put("/profile", upload.single('photo'), async (req, res) => {
   try {
-    const user = await User.findById(req.body.userId);
+    const { userId, phone, address, cin, bio } = req.body;
 
+    if (!userId) {
+      return res.status(400).json({ message: "userId requis" });
+    }
+
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    user.phone = req.body.phone;
-    user.address = req.body.address;
-    user.cin = req.body.cin;
-    user.bio = req.body.bio;
-    user.photo = req.body.photo;
-    user.experience = req.body.experience;
-    user.services = req.body.services;
+    user.phone = phone;
+    user.address = address;
+    user.cin = cin;
+    user.bio = bio;
+
+    if (user.role === 'provider') {
+      user.experience = req.body.experience;
+      user.services = typeof req.body.services === 'string' 
+        ? req.body.services.split(',') 
+        : req.body.services;
+    }
+
+    if (req.file) {
+      if (user.photo) {
+        const oldPath = path.join(__dirname, '../uploads', user.photo);
+        fs.unlink(oldPath, (err) => {
+          if (err) console.error('Erreur lors de la suppression de l\'ancienne photo:', err);
+        });
+      }
+      user.photo = req.file.filename;
+    }
 
     const updatedUser = await user.save();
     res.status(200).json(updatedUser);
@@ -166,6 +185,21 @@ router.post("/profile", async (req, res) => {
   }
 });
 
+
+// Backend - Route pour récupérer les données d'un utilisateur
+router.get("/profile/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).select('-password'); 
+    if (!user) {
+      return res.status(404).json({ message: "Utilisateur non trouvé" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Erreur lors de la récupération des données" });
+  }
+});
+ 
 // Route pour obtenir tous les fournisseurs
 router.get("/", async (req, res) => {
     try {

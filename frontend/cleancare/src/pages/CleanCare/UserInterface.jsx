@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FaUser, FaSignOutAlt, FaHome, FaHistory, FaCog, FaBell, FaCalendarAlt, FaStar, FaPhone, FaMapMarkerAlt, FaInfoCircle, FaBriefcase, FaIdCard, FaCamera} from "react-icons/fa";
 import { FcServices } from "react-icons/fc";
 import { GiProgression } from "react-icons/gi";
+import axios from 'axios';
+
 
 function UserInterface() {
   const navigate = useNavigate();
@@ -111,32 +113,36 @@ function UserInterface() {
 
   const saveProfile = async () => {
     try {
-      const response = await fetch("/api/users/profile", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          userId: user._id, // تأكدي يكون عندك user._id
-          phone: profileData.phone,
-          address: profileData.address,
-          cin: profileData.cin,
-          bio: profileData.bio,
-          photo: profileData.photoPreview,
-          experience: profileData.experience,
-          services: profileData.services,
-        }),
-      });
-  
-      const data = await response.json();
-      if (response.ok) {
-        alert("Profil enregistré avec succès !");
-      } else {
-        alert("Erreur: " + data.error);
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+    const userId = user?.id;
+    
+      const formData = new FormData();
+      formData.append("userId", userId);
+      formData.append("phone", profileData.phone);
+      formData.append("address", profileData.address);
+      formData.append("cin", profileData.cin);
+      formData.append("bio", profileData.bio);
+      formData.append("experience", profileData.experience);
+      formData.append("services", JSON.stringify(profileData.services));
+      if (profileData.photo) {
+        formData.append("photo", profileData.photo);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Une erreur est survenue.");
+  
+      const response = await axios.put(
+        `http://localhost:5000/api/users/profile`, // ✅ backend route
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+  
+      console.log("Profil mis à jour:", response.data);
+    } catch (error) {
+      console.error("Error during profile update:", error);
     }
   };
   
@@ -442,7 +448,7 @@ function UserInterface() {
           >
             {activeTab === "dashboard" && "Tableau de bord"}
             {activeTab === "services" &&
-              (user?.role === "client" ? "Mes Rendez-vous" : "Mes Services")}
+            (user?.role === "client" ? "Mes Rendez-vous" : "Mes Services")}
             {activeTab === "history" && "Historique"}
             {activeTab === "notifications" && "Notifications"}
             {activeTab === "settings" && "Paramètres"}
