@@ -16,6 +16,7 @@
     "aos": "^2.3.4",
     "axios": "^1.8.2",
     "core-js": "^3.41.0",
+    "framer-motion": "^12.6.5",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.476.0",
     "react": "^19.1.0",

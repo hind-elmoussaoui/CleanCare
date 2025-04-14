@@ -1,14 +1,128 @@
-import React from 'react'
+import React from 'react';
+import { 
+  FiGithub, FiTwitter, FiLinkedin, FiMail,
+  FiHeart, FiCode 
+} from 'react-icons/fi';
 
 function FooterDash() {
-    return (
-        <footer className="p-4 fixed bottom-0 left-0 right-0">
-        <hr className="my-8 border-gray-300 ml-60 mr-60 dark:border-gray-700" />
-            <div className="container mx-auto text-center text-gray-600">
-                <p>&copy; 2025 CleaἢCarἒ(✿◡‿◡). Tous droits réservés.</p>
-            </div>
-        </footer>
-    );
-};
+  return (
+    <footer className="bg-white border-t border-gray-200 dark:bg-gray-900 dark:border-gray-800">
+      <div className="mx-auto w-full max-w-screen-xl p-6">
+        {/* Main Footer Content */}
+        <div className="md:flex md:justify-between md:items-center">
+          {/* Branding */}
+          <div className="mb-6 md:mb-0">
+            <span className="flex items-center text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
+              CleaἢCarἒ
+              <span className="ml-2 text-pink-500">(✿◡‿◡)</span>
+            </span>
+            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+              Votre solution de nettoyage et garde d'enfant 
+            </p>
+          </div>
 
-export default FooterDash
+          {/* Links Grid */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            <div>
+              <h3 className="mb-4 text-sm font-semibold uppercase text-gray-900 dark:text-white">
+                Navigation
+              </h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    Dashboard
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    Services
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-4 text-sm font-semibold uppercase text-gray-900 dark:text-white">
+                Légale
+              </h3>
+              <ul className="space-y-2">
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    Politique de confidentialité
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    CGU
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-gray-600 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+                    Cookies
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="mb-4 text-sm font-semibold uppercase text-gray-900 dark:text-white">
+                Contact
+              </h3>
+              <ul className="space-y-2">
+                <li className="flex items-center">
+                  <FiMail className="mr-2 text-gray-500" />
+                  <span className="text-gray-600 dark:text-gray-400">
+                    contact@cleacar.com
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <hr className="my-6 border-gray-200 dark:border-gray-800" />
+
+        {/* Bottom Bar */}
+        <div className="flex flex-col items-center justify-between sm:flex-row">
+          <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
+            <span>© 2025</span>
+            <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400">
+              CleaἢCarἒ
+            </a>
+            <span>Tous droits réservés</span>
+          </div>
+
+          {/* Social Links */}
+          <div className="flex mt-4 space-x-6 sm:mt-0">
+            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+              <FiGithub className="w-5 h-5" />
+            </a>
+            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+              <FiTwitter className="w-5 h-5" />
+            </a>
+            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+              <FiLinkedin className="w-5 h-5" />
+            </a>
+          </div>
+        </div>
+
+        {/* Made With Love */}
+        <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
+          <p className="flex items-center justify-center">
+            <span>Made with</span>
+            <FiHeart className="mx-1 text-pink-500" />
+            <span>and</span>
+            <FiCode className="mx-1 text-indigo-500" />
+            <span>in morocco</span>
+          </p>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+export default FooterDash;

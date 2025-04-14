@@ -31,12 +31,14 @@ const AdminDashboard = () => {
             ...s,
             type: 'service',
             bookingDate: s.createdAt,
-            totalPrice: s.totalPrice || b.service.price
+            status: 'active',
+            totalPrice: s.price // Pour les services, le prix total est le prix unitaire
           })),
           ...bookingsData.map(b => ({
             ...b,
             type: 'booking',
             bookingDate: b.createdAt,
+            // Le prix total est déjà inclus dans les données de réservation
             totalPrice: b.totalPrice || b.service.price
           }))
         ].sort((a, b) => new Date(b.bookingDate) - new Date(a.bookingDate));
@@ -52,35 +54,6 @@ const AdminDashboard = () => {
 
     fetchData();
   }, []);
-
-  const handleDelete = async (id, type) => {
-    if (window.confirm("Êtes-vous sûr de vouloir supprimer cet élément ?")) {
-      try {
-        const endpoint = type === 'booking' ? 'bookings' : 'services';
-        const response = await fetch(`http://localhost:5000/api/${endpoint}/${id}`, {
-          method: 'DELETE'
-        });
-
-        if (!response.ok) {
-          throw new Error('Erreur lors de la suppression');
-        }
-
-        setReservations(reservations.filter(item => 
-          !(item._id === id && item.type === type)
-        ));
-      } catch (err) {
-        console.error("Erreur:", err);
-        setError(err.message);
-      }
-    }
-  };
-
-  const handleEdit = (reservation) => {
-    // Implémentez la logique d'édition ici
-    console.log("Éditer:", reservation);
-    alert(`Mode édition pour ${reservation.type} ID: ${reservation._id}`);
-    // Pour une implémentation complète, utilisez un modal ou une page séparée
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "Non spécifié";
@@ -101,10 +74,10 @@ const AdminDashboard = () => {
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
       
-      <div className="flex-1 overflow-hidden p-4 md:p-6">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">Toutes les Réservations</h1>
+      <div className="flex-1 overflow-auto p-6">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">Toutes les Réservations</h1>
         
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-md p-6">
           {loading ? (
             <div className="flex justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
@@ -127,26 +100,25 @@ const AdminDashboard = () => {
               Aucune réservation disponible
             </div>
           ) : (
-            <div className="overflow-x-visible overflow-y-auto">
-              <table className="w-full table-auto">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de réservation</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates de service</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Total</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                    <th className="px-3 py-2 md:px-4 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date de réservation</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates de service</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {reservations.map(reservation => (
                     <tr key={`${reservation.type}-${reservation._id}`}>
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-normal text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {formatDate(reservation.bookingDate)}
                       </td>
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-normal">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">
                           {reservation.service?.name || 'N/A'}
                         </div>
@@ -154,7 +126,7 @@ const AdminDashboard = () => {
                           {reservation.type === 'booking' ? 'Réservation' : 'Service'}
                         </div>
                       </td>
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-normal">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         {reservation.client ? (
                           <>
                             <div className="text-sm font-medium text-gray-900">
@@ -171,10 +143,11 @@ const AdminDashboard = () => {
                           <div className="text-sm text-gray-500">Non applicable</div>
                         )}
                       </td>
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-normal text-sm text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-900">
                           {reservation.type === 'service' || reservation.type === 'booking' ? (
                             reservation.schedule?.frequency === 'une seule fois' && reservation.schedule?.selectedDate ? (
+                              // Une seule date
                               formatDate(reservation.schedule.selectedDate)
                             ) : reservation.schedule?.frequency === 'plusieurs fois par semaine' ? (
                               <>
@@ -182,13 +155,14 @@ const AdminDashboard = () => {
                               Au {formatDate(reservation.schedule.endDate)}
                               </>
                             ) : (
-                              formatDate(reservation.createdAt)
+                              formatDate(reservation.createdAt) // fallback
                             )
                           ) : (
-                            formatDate(reservation.createdAt)
+                            formatDate(reservation.createdAt) // fallback
                           )}
                         </div>
 
+                        {/* Affichage des jours sélectionnés si plusieurs fois */}
                         {reservation.schedule?.frequency === 'plusieurs fois par semaine' && reservation.schedule?.selectedDays?.length > 0 && (
                           <div className="text-xs text-gray-500">
                             Jours: {reservation.schedule.selectedDays.join(', ')}
@@ -196,11 +170,13 @@ const AdminDashboard = () => {
                         )}
                       </td>
 
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {reservation.totalPrice || reservation.service?.price || 'N/A'} MAD
                       </td>
 
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap">
+                      
+
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                           ${reservation.status === 'confirmed' || reservation.status === 'active' ? 'bg-green-100 text-green-800' : 
                             reservation.status === 'cancelled' ? 'bg-red-100 text-red-800' : 
@@ -209,21 +185,6 @@ const AdminDashboard = () => {
                            reservation.status === 'cancelled' ? 'Annulé' : 
                            reservation.status === 'active' ? 'Actif' : 'Inconnu'}
                         </span>
-                      </td>
-                      
-                      <td className="px-3 py-2 md:px-4 md:py-3 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleEdit(reservation)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-2"
-                        >
-                          Éditer
-                        </button>
-                        <button
-                          onClick={() => handleDelete(reservation._id, reservation.type)}
-                          className="text-red-600 hover:text-red-900"
-                        >
-                          Supprimer
-                        </button>
                       </td>
                     </tr>
                   ))}

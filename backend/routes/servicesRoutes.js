@@ -1,61 +1,63 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Service = require("../models/ServiceModels");
+const Service = require('../models/ServiceModels');
 
-// Route pour créer une réservation
-router.post("/", async (req, res) => {
-    console.log("Données reçues pour la réservation :", req.body);
-    const {
-        service,
-        frequency,
-        selectedDate,
-        startDate,
-        endDate,
-        selectedDays,
-        name,
-        location,
-        accommodates,
-    } = req.body;
-
-    try {
-        const newService = new Service({
-            service: {
-                name: service.name,
-                description: service.description,
-                price: Number(service.price) || 0, // Convertir en nombre et mettre une valeur par défaut
-            },
-            frequency,
-            selectedDate,
-            startDate,
-            endDate,
-            selectedDays,
-            name,
-            location,
-            accommodates,
-        });
-
-        await newService.save();
-        res.status(201).json({ success: true, message: "Réservation créée avec succès", data: newService });
-    } catch (error) {
-        console.error("Erreur lors de la réservation:", error);
-        res.status(500).json({ success: false, message: "Erreur lors de la création de la réservation" });
-    }
-console.log("Service reçu :", service);
-console.log("Nom :", service?.name);
-console.log("Description :", service?.description);
-console.log("Prix :", service?.price);
-
+// Créer un nouveau service
+router.post('/', async (req, res) => {
+  try {
+    const service = new Service(req.body);
+    await service.save();
+    res.status(201).json(service);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
 });
 
-router.get("/", async (req, res) => {
-    try {
-        const reservations = await Service.find();
-        res.status(200).json({ success: true, data: reservations });
-    } catch (error) {
-        console.error("Erreur lors de la récupération des réservations:", error);
-        res.status(500).json({ success: false, message: "Erreur lors de la récupération des réservations" });
-    }
+// Lister tous les services
+router.get('/', async (req, res) => {
+  try {
+    const services = await Service.find().sort({ createdAt: -1 });
+    res.json(services);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 });
 
+// Récupérer un service par ID
+router.get('/:id', async (req, res) => {
+  try {
+    const service = await Service.findById(req.params.id);
+    if (!service) return res.status(404).json({ error: 'Service non trouvé' });
+    res.json(service);
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+// Mettre à jour un service
+router.put('/:id', async (req, res) => {
+  try {
+    const service = await Service.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+    if (!service) return res.status(404).json({ error: 'Service non trouvé' });
+    res.json(service);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Supprimer un service
+router.delete('/:id', async (req, res) => {
+  try {
+    const service = await Service.findByIdAndDelete(req.params.id);
+    if (!service) return res.status(404).json({ error: 'Service non trouvé' });
+    res.json({ message: 'Service supprimé' });
+  } catch (error) {
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
 
 module.exports = router;

@@ -30,10 +30,9 @@ function Dash() {
         <div className="flex-1 p-8 bg-gray-100 z-10">
         <NavDash />
         <StatistiqueDash />
+        <FooterDash />
         </div>
-        
       </div>
-      <FooterDash />
     </div>
   );
 }
