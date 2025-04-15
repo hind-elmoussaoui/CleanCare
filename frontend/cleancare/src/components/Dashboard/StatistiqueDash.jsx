@@ -1,16 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiUsers, FiCalendar, FiDollarSign, FiStar, FiClock, FiCheckCircle } from 'react-icons/fi';
 
 function StatistiqueDash() {
+  const [avisStats, setAvisStats] = useState({
+    averageRating: 0,
+    ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+    totalAvis: 0
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAvisStats = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/avis/stats');
+        if (!response.ok) throw new Error('Erreur de chargement des statistiques');
+        
+        const data = await response.json();
+        setAvisStats(data);
+      } catch (error) {
+        console.error('Erreur:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvisStats();
+  }, []);
+
+  // Calcul des pourcentages pour chaque note
+  const calculatePercentage = (count) => {
+    return avisStats.totalAvis > 0 
+      ? Math.round((count / avisStats.totalAvis) * 100) 
+      : 0;
+  };
+
   // Données de démonstration (à remplacer par vos données réelles)
   const stats = [
     { title: "Clients actifs", value: "248", change: "+12%", icon: <FiUsers className="text-blue-500" size={24} />, bgColor: "bg-blue-50" },
     { title: "Réservations", value: "56", change: "+5%", icon: <FiCalendar className="text-green-500" size={24} />, bgColor: "bg-green-50" },
     { title: "Revenu mensuel", value: "24,800 MAD", change: "+18%", icon: <FiDollarSign className="text-purple-500" size={24} />, bgColor: "bg-purple-50" },
-    { title: "Satisfaction", value: "4.8/5", change: "+0.2", icon: <FiStar className="text-yellow-500" size={24} />, bgColor: "bg-yellow-50" },
+    { title: "Satisfaction", value: loading ? "Chargement..." : `${avisStats.averageRating.toFixed(1)}/5`, 
+      change: "+0.2", icon: <FiStar className="text-yellow-500" size={24} />, bgColor: "bg-yellow-50" },
     { title: "En cours", value: "12", change: "-3", icon: <FiClock className="text-orange-500" size={24} />, bgColor: "bg-orange-50" },
     { title: "Complétés", value: "44", change: "+7", icon: <FiCheckCircle className="text-teal-500" size={24} />, bgColor: "bg-teal-50" }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 ">
@@ -44,6 +85,69 @@ function StatistiqueDash() {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Détails des avis */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques de satisfaction</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Répartition des notes */}
+            <div>
+              <h3 className="font-medium text-gray-700 mb-3">Répartition des notes</h3>
+              <div className="space-y-3">
+                {[5, 4, 3, 2, 1].map((rating) => (
+                  <div key={rating} className="flex items-center">
+                    <div className="flex items-center w-16">
+                      <span className="text-gray-600 mr-2">{rating}</span>
+                      <FiStar className="text-yellow-400 fill-yellow-400" size={16} />
+                    </div>
+                    <div className="flex-1 mx-2">
+                      <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                        <div 
+                          className="bg-yellow-400 h-full" 
+                          style={{ width: `${calculatePercentage(avisStats.ratingDistribution[rating])}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600 w-12 text-right">
+                      {calculatePercentage(avisStats.ratingDistribution[rating])}%
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Détails supplémentaires */}
+            <div>
+              <h3 className="font-medium text-gray-700 mb-3">Détails</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-600">Nombre total d'avis</p>
+                  <p className="text-2xl font-bold text-blue-800">{avisStats.totalAvis}</p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-green-600">Note moyenne</p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {avisStats.averageRating.toFixed(1)}/5
+                  </p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm text-yellow-600">5 étoiles</p>
+                  <p className="text-2xl font-bold text-yellow-800">
+                    {avisStats.ratingDistribution[5]} ({calculatePercentage(avisStats.ratingDistribution[5])}%)
+                  </p>
+                </div>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-purple-600">1-2 étoiles</p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {avisStats.ratingDistribution[1] + avisStats.ratingDistribution[2]} (
+                    {calculatePercentage(avisStats.ratingDistribution[1] + avisStats.ratingDistribution[2])}%)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Graphiques et sections supplémentaires */}

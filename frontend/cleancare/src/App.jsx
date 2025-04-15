@@ -17,7 +17,7 @@ import OrderPage from "./pages/CleanCare/OrderForm";
 import ConfirmationPage from "./pages/CleanCare/ConfirmationPage";
 import OrderDashboard from "./components/Dashboard/OrderDashboard";
 import Users from "./components/Dashboard/Users";
-import AdminProviders from "./components/Dashboard/AdminProviders";
+import GestionAvis from "./components/Dashboard/GestionAvis";
 import SignIn from "./components/SignIn";
 import ProviderDashboard from "./components/Dashboard/ProviderDashboard";
 import ClientDashboard from "./components/Dashboard/ClientDashboard";
@@ -46,7 +46,7 @@ function AppContent() {
     "/admin/dashboard/messages",
     "/admin/dashboard/profile",
     "/admin/dashboard/orders",
-    "/admin/dashboard/add",
+    "/admin/dashboard/avis",
     "/admin/dashboard/provider-dashboard",
     "/",
     "/services/:id",
@@ -84,7 +84,7 @@ function AppContent() {
           <Route path="/admin/dashboard/messages" element={<Messages />} />
           <Route path="/admin/dashboard/profile" element={<ProfilePage />} />
           <Route path="/admin/dashboard/orders" element={<OrderDashboard />} />
-          <Route path="/admin/dashboard/add" element={<AdminProviders />} />
+          <Route path="/admin/dashboard/avis" element={<GestionAvis />} />
           <Route path="/admin/dashboard/provider-dashboard" element={<ProviderDashboard />} />
           <Route path="/admin/dashboard/client-dashboard" element={<ClientDashboard />} />
           <Route path="/admin/dashboard/users" element={<Users />} />

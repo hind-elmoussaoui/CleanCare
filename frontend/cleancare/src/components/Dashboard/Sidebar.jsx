@@ -19,7 +19,7 @@ function Sidebar() {
   const menuItems = [
     { path: "/admin/dashboard", icon: <FiHome className="text-lg" />, label: "Dashboard", key: "dashboard" },
     { path: "/admin/dashboard/profile", icon: <FiUser className="text-lg" />, label: "Profile", key: "profile" },
-    { path: "/admin/dashboard/add", icon: <FiPlusSquare className="text-lg" />, label: "Ajouter", key: "add" },
+    { path: "/admin/dashboard/avis", icon: <FiPlusSquare className="text-lg" />, label: "Avis", key: "avis" },
     { path: "/admin/dashboard/orders", icon: <FiClipboard className="text-lg" />, label: "Commandes", key: "orders" },
     { path: "/admin/dashboard/users", icon: <FiUsers className="text-lg" />, label: "Utilisateurs", key: "users" },
     { path: "/admin/dashboard/services", icon: <FiShoppingCart className="text-lg" />, label: "Services", key: "services" },

@@ -14,6 +14,7 @@ const providerRoutes = require('./routes/providersRoutes');
 const clientRouter = require('./routes/clientsRoutes');
 const adminRoutes = require('./routes/adminsRoutes');
 const usersRoutes = require('./routes/userRoutes');
+const avisRoutes = require('./routes/avisRoutes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/providers', providerRoutes);
 app.use('/api/clients', clientRouter);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', usersRoutes);
+app.use('/api/avis', avisRoutes);
 
 // 🔹 Gestion des erreurs globales
 app.use((err, req, res, next) => {
