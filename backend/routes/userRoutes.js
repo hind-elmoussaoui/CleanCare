@@ -185,6 +185,84 @@ router.put("/profile", upload.single('photo'), async (req, res) => {
   }
 });
 
+router.get('/stats', async (req, res) => {
+  try {
+    // Statistiques pour les clients normaux
+    const clientStats = await User.aggregate([
+      { $match: { role: 'client' } },
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          active: [
+            { 
+              $match: { 
+                lastActivity: { $gte: new Date(Date.now() - 30*24*60*60*1000) }
+              }
+            },
+            { $count: 'count' }
+          ],
+          newThisMonth: [
+            { 
+              $match: { 
+                createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
+              }
+            },
+            { $count: 'count' }
+          ]
+        }
+      }
+    ]);
+
+    // Statistiques pour les providers
+    const providerStats = await User.aggregate([
+      { $match: { role: 'provider' } },
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          active: [
+            { 
+              $match: { 
+                lastActivity: { $gte: new Date(Date.now() - 30*24*60*60*1000) }
+              }
+            },
+            { $count: 'count' }
+          ],
+          newThisMonth: [
+            { 
+              $match: { 
+                createdAt: { $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) }
+              }
+            },
+            { $count: 'count' }
+          ]
+        }
+      }
+    ]);
+
+    const getCount = (stats, key) => stats[0][key][0]?.count || 0;
+
+    res.json({
+      clients: {
+        total: getCount(clientStats, 'total'),
+        active: getCount(clientStats, 'active'),
+        newThisMonth: getCount(clientStats, 'newThisMonth')
+      },
+      providers: {
+        total: getCount(providerStats, 'total'),
+        active: getCount(providerStats, 'active'),
+        newThisMonth: getCount(providerStats, 'newThisMonth')
+      },
+      combined: {
+        total: getCount(clientStats, 'total') + getCount(providerStats, 'total'),
+        active: getCount(clientStats, 'active') + getCount(providerStats, 'active'),
+        newThisMonth: getCount(clientStats, 'newThisMonth') + getCount(providerStats, 'newThisMonth')
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}); 
 
 // Backend - Route pour récupérer les données d'un utilisateur
 router.get("/profile/:userId", async (req, res) => {
@@ -253,15 +331,6 @@ router.put('/update-password', async (req, res) => {
     }
     res.status(500).json({ message: 'Erreur serveur lors de la mise à jour du mot de passe' });
   }
-});
-
-router.post('/test-upload', upload.single('photo'), (req, res) => {
-  console.log('Fichier reçu:', req.file);
-  console.log('Corps de la requête:', req.body);
-  res.json({
-    file: req.file,
-    body: req.body
-  });
 });
 
 module.exports = router;

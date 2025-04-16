@@ -1,29 +1,26 @@
-// middleware/auth.js
+// backend/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
-const User = require('../models/UserModels');
 
-module.exports = async function(req, res, next) {
+const authenticateAdmin = (req, res, next) => {
+  const token = req.header('Authorization')?.replace('Bearer ', '');
+  
+  if (!token) {
+    return res.status(401).json({ message: 'Accès non autorisé' });
+  }
+
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
-    if (!token) {
-      return res.status(401).json({ message: 'Authentication required' });
+    // Vérifiez que l'utilisateur est un admin
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'Accès réservé aux administrateurs' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'votre-secret-key');
-    const user = await User.findOne({
-      _id: decoded.userId,
-      'tokens.token': token
-    });
-
-    if (!user) {
-      throw new Error();
-    }
-
-    req.token = token;
-    req.user = user;
+    req.user = decoded;
     next();
   } catch (error) {
-    res.status(401).json({ message: 'Please authenticate' });
+    res.status(401).json({ message: 'Token invalide' });
   }
 };
+
+module.exports = { authenticateAdmin };

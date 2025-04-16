@@ -132,6 +132,17 @@ router.post('/users', async (req, res) => {
   }
 });
 
+// Les autres routes (GET, DELETE) restent identiques
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
 // Mettre à jour un utilisateur (sans cryptage automatique)
 router.put('/users/:id', async (req, res) => {
   try {
@@ -157,17 +168,6 @@ router.put('/users/:id', async (req, res) => {
       message: 'Utilisateur mis à jour avec succès',
       user: updatedUser
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Erreur serveur' });
-  }
-});
-
-// Les autres routes (GET, DELETE) restent identiques
-router.get('/users', async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.json(users);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });

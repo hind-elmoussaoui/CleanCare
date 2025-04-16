@@ -7,16 +7,43 @@ function StatistiqueDash() {
     ratingDistribution: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
     totalAvis: 0
   });
+
+  // Nouvel état pour les stats utilisateurs
+  const [userStats, setUserStats] = useState({
+    totalClients: 0,
+    activeClients: 0,
+    newClientsThisMonth: 0,
+    clientGrowth: 0
+  });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchAvisStats = async () => {
+    const fetchStats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/avis/stats');
-        if (!response.ok) throw new Error('Erreur de chargement des statistiques');
+        // Récupération en parallèle des stats avis et utilisateurs
+        const [avisResponse, usersResponse] = await Promise.all([
+          fetch('http://localhost:5000/api/avis/stats'),
+          fetch('http://localhost:5000/api/users/stats', {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          }),
+        ]);
         
-        const data = await response.json();
-        setAvisStats(data);
+        if (!avisResponse.ok || !usersResponse.ok) {
+          throw new Error('Erreur de chargement des statistiques');
+        }
+        
+        const avisData = await avisResponse.json();
+        const usersData = await usersResponse.json();
+        
+        setAvisStats(avisData);
+        setUserStats({
+          clients: usersData.clients,
+          providers: usersData.providers,
+          combined: usersData.combined
+        });
       } catch (error) {
         console.error('Erreur:', error);
       } finally {
@@ -24,7 +51,7 @@ function StatistiqueDash() {
       }
     };
 
-    fetchAvisStats();
+    fetchStats();
   }, []);
 
   // Calcul des pourcentages pour chaque note
@@ -36,7 +63,9 @@ function StatistiqueDash() {
 
   // Données de démonstration (à remplacer par vos données réelles)
   const stats = [
-    { title: "Clients actifs", value: "248", change: "+12%", icon: <FiUsers className="text-blue-500" size={24} />, bgColor: "bg-blue-50" },
+    { title: "Utilisateurs", value: userStats.combined?.total || 0, change: `${userStats.combined?.active || 0} actifs (${Math.round((userStats.combined?.active / (userStats.combined?.total || 1) * 100))}%)`, 
+    icon: <FiUsers className="text-indigo-500" />, bgColor: "bg-indigo-50", tooltip: ` Total: ${userStats.combined?.total || 0} Clients: ${userStats.clients?.total || 0} 
+    Prestataires: ${userStats.providers?.total || 0} Nouveaux ce mois: ${userStats.combined?.newThisMonth || 0} `},
     { title: "Réservations", value: "56", change: "+5%", icon: <FiCalendar className="text-green-500" size={24} />, bgColor: "bg-green-50" },
     { title: "Revenu mensuel", value: "24,800 MAD", change: "+18%", icon: <FiDollarSign className="text-purple-500" size={24} />, bgColor: "bg-purple-50" },
     { title: "Satisfaction", value: loading ? "Chargement..." : `${avisStats.averageRating.toFixed(1)}/5`, 
@@ -74,7 +103,8 @@ function StatistiqueDash() {
                   <p className="text-sm font-medium text-gray-500">{stat.title}</p>
                   <p className="text-2xl font-bold text-gray-800 mt-1">{stat.value}</p>
                   <p className={`text-sm mt-2 ${
-                    stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'
+                    stat.change.startsWith('+') ? 'text-green-600' : 
+                    stat.change.endsWith('%') ? 'text-blue-600' : 'text-gray-600'
                   }`}>
                     {stat.change} vs mois dernier
                   </p>
@@ -149,6 +179,29 @@ function StatistiqueDash() {
             </div>
           </div>
         </div>
+        
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+  <h2 className="text-lg font-semibold text-gray-800 mb-4">Statistiques Utilisateurs</h2>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="bg-blue-50 p-4 rounded-lg">
+      <p className="text-sm text-blue-600">Clients totaux</p>
+      <p className="text-2xl font-bold text-blue-800">{userStats.clients?.total || 0}</p>
+    </div>
+    <div className="bg-green-50 p-4 rounded-lg">
+      <p className="text-sm text-green-600">Prestataires totaux</p>
+      <p className="text-2xl font-bold text-green-800">{userStats.providers?.total || 0}</p>
+    </div>
+    <div className="bg-purple-50 p-4 rounded-lg">
+      <p className="text-sm text-purple-600">Total utilisateurs</p>
+      <p className="text-2xl font-bold text-purple-800">{userStats.combined?.total || 0}</p>
+    </div>
+    <div className="bg-teal-50 p-4 rounded-lg">
+      <p className="text-sm text-teal-600">Utilisateurs actifs</p>
+      <p className="text-2xl font-bold text-teal-800">{userStats.combined?.active || 0}</p>
+    </div>
+  </div>
+</div>
 
         {/* Graphiques et sections supplémentaires */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

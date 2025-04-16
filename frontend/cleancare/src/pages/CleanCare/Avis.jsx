@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FiX, FiStar, FiChevronDown } from "react-icons/fi";
+import starBackground from '../../assets/avis.jpg';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AvisCard = ({ name, role, comment, rating }) => {
   return (
@@ -121,8 +124,25 @@ const Avis = () => {
       });
       setShowModal(false);
       
-      // Message de confirmation
-      alert("Merci pour votre avis ! Il sera publié après validation par notre équipe.");
+      // Nouveau message toast stylé
+    toast.success(
+      <div className="p-2">
+        <h3 className="font-bold text-lg">Merci pour votre avis !</h3>
+        <p className="text-gray-600">Il sera publié après validation par notre équipe.</p>
+      </div>, 
+      {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        className: "border-l-4 border-green-500",
+      }
+    );
+
     } catch (error) {
       console.error('Erreur:', error);
       alert("Une erreur est survenue. Veuillez réessayer.");
@@ -131,88 +151,18 @@ const Avis = () => {
 
   // Toutes les villes marocaines par région
   const villesParRegion = {
-    "Casablanca-Settat": [
-      "Casablanca",
-      "Mohammédia",
-      "El Jadida",
-      "Settat",
-      "Benslimane",
-      "Berrechid",
-      "Nouaceur",
-      "Médiouna",
-    ],
-    "Rabat-Salé-Kénitra": [
-      "Rabat",
-      "Salé",
-      "Kénitra",
-      "Témara",
-      "Skhirat",
-      "Sidi Kacem",
-      "Sidi Slimane",
-    ],
-    "Tanger-Tétouan-Al Hoceïma": [
-      "Tanger",
-      "Tétouan",
-      "Al Hoceïma",
-      "Larache",
-      "Chefchaouen",
-      "Fnideq",
-      "M'diq",
-    ],
-    "Fès-Meknès": [
-      "Fès",
-      "Meknès",
-      "Ifrane",
-      "Sefrou",
-      "Moulay Yacoub",
-      "El Hajeb",
-      "Taounate",
-      "Taza",
-    ],
-    "Marrakech-Safi": [
-      "Marrakech",
-      "Safi",
-      "El Kelâa des Sraghna",
-      "Essaouira",
-      "Rehamna",
-      "Youssoufia",
-      "Chichaoua",
-    ],
-    Oriental: [
-      "Oujda",
-      "Nador",
-      "Berkane",
-      "Taourirt",
-      "Jerada",
-      "Figuig",
-      "Driouch",
-    ],
-    "Béni Mellal-Khénifra": [
-      "Béni Mellal",
-      "Khénifra",
-      "Khouribga",
-      "Fquih Ben Salah",
-      "Azilal",
-    ],
-    "Souss-Massa": [
-      "Agadir",
-      "Inezgane-Aït Melloul",
-      "Taroudant",
-      "Tiznit",
-      "Oulad Teima",
-      "Tata",
-      "Chtouka-Aït Baha",
-    ],
+    "Casablanca-Settat": ["Casablanca", "Mohammédia", "El Jadida", "Settat", "Benslimane", "Berrechid", "Nouaceur", "Médiouna" ],
+    "Rabat-Salé-Kénitra": ["Rabat", "Salé", "Kénitra", "Témara", "Skhirat", "Sidi Kacem", "Sidi Slimane" ],
+    "Tanger-Tétouan-Al Hoceïma": ["Tanger", "Tétouan", "Al Hoceïma", "Larache", "Chefchaouen", "Fnideq", "M'diq"],
+    "Fès-Meknès": ["Fès", "Meknès", "Ifrane", "Sefrou", "Moulay Yacoub", "El Hajeb", "Taounate", "Taza"],
+    "Marrakech-Safi": ["Marrakech", "Safi", "El Kelâa des Sraghna", "Essaouira", "Youssoufia", "Rehamna", "Chichaoua"],
+    Oriental: ["Oujda", "Nador", "Berkane", "Taourirt", "Jerada", "Figuig", "Driouch"],
+    "Béni Mellal-Khénifra": ["Béni Mellal", "Khénifra", "Khouribga", "Fquih Ben Salah", "Azilal"],
+    "Souss-Massa": ["Agadir", "Inezgane-Aït Melloul", "Taroudant", "Tiznit", "Tata", "Oulad Teima", "Chtouka-Aït Baha"],
     "Guelmim-Oued Noun": ["Guelmim", "Sidi Ifni", "Tan-Tan", "Assa-Zag"],
     "Laâyoune-Sakia El Hamra": ["Laâyoune", "Boujdour", "Tarfaya", "Es-Semara"],
     "Dakhla-Oued Ed-Dahab": ["Dakhla", "Aousserd"],
-    "Drâa-Tafilalet": [
-      "Errachidia",
-      "Ouarzazate",
-      "Tinghir",
-      "Zagora",
-      "Midelt",
-    ],
+    "Drâa-Tafilalet": [ "Errachidia", "Ouarzazate", "Tinghir", "Zagora", "Midelt"]
   };
 
   if (loading) {
@@ -271,8 +221,12 @@ const Avis = () => {
 
         {/* Modal pour ajouter un avis */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-md w-full p-6 relative">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div 
+            className="absolute inset-0 bg-cover bg-center opacity-70"
+            style={{ backgroundImage: `url(${starBackground})` }}
+            ></div>
+            <div className="bg-white text-black rounded-lg w-full max-w-md p-6 relative z-10 border">
               <button
                 onClick={() => setShowModal(false)}
                 className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
@@ -280,13 +234,13 @@ const Avis = () => {
                 <FiX size={24} />
               </button>
 
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">
+              <h3 className="text-2xl font-bold text-gray-800 mb-4">
                 Donnez votre avis
               </h3>
 
               <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">
+                <div className="mb-2">
+                  <label className="block text-gray-700">
                     Votre nom complet
                   </label>
                   <input
@@ -299,8 +253,8 @@ const Avis = () => {
                   />
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">
+                <div className="mb-2">
+                  <label className="block text-gray-700">
                     Type de service
                   </label>
                   <select
@@ -316,8 +270,8 @@ const Avis = () => {
                   </select>
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Ville</label>
+                <div className="mb-2">
+                  <label className="block text-gray-700">Ville</label>
                   <select
                     name="city"
                     value={newAvis.city}
@@ -339,8 +293,8 @@ const Avis = () => {
                   <FiChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-2">Note</label>
+                <div className="mb-2">
+                  <label className="block text-gray-700">Note</label>
                   <div className="flex space-x-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -363,8 +317,8 @@ const Avis = () => {
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <label className="block text-gray-700 mb-2">
+                <div className="mb-2">
+                  <label className="block text-gray-700 ">
                     Votre commentaire
                   </label>
                   <textarea
@@ -388,6 +342,11 @@ const Avis = () => {
           </div>
         )}
       </div>
+      <ToastContainer 
+      toastClassName="shadow-lg"
+      bodyClassName="font-sans"
+      progressClassName="bg-blue-500"
+      />
     </div>
   );
 };
