@@ -1,30 +1,25 @@
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 
-const ProtectedRoute = ({ children, allowedRoles }) => {
-    // 1. Récupération plus sécurisée des données utilisateur
+const ProtectedRoute = ({ children, allowedRoles = [] }) => {
+    const location = useLocation(); // Correction 1: Utilisez le hook useLocation
+    
+    // Récupération des données
     const userData = JSON.parse(localStorage.getItem('user')) || {};
     const token = localStorage.getItem('token');
 
-    // 2. Vérification plus complète
+    // Vérifications
     const isAuthenticated = !!token;
-    const hasValidRole = allowedRoles.includes(userData?.role);
+    const userRole = userData?.role || '';
+    const hasValidRole = allowedRoles.length === 0 || allowedRoles.includes(userRole);
 
-    // 3. Gestion des cas d'erreur
     if (!isAuthenticated) {
-        // Redirection vers la page de connexion avec origine pour redirection post-login
-        return <Navigate to="/signin" state={{ from: location }} replace />;
+        // Correction 2: Simplifiez l'objet state pour éviter DataCloneError
+        return <Navigate to="/signin" state={{ from: location.pathname }} replace />;
     }
 
     if (!hasValidRole) {
-        // 4. Option 1: Redirection vers page non-autorisé
         return <Navigate to="/unauthorized" replace />;
-        
-        // Option 2: Retourner null + message d'erreur (selon votre UX)
-        // return null;
     }
-
-    // 5. Vérification du token côté serveur (optionnel mais recommandé)
-    // Vous pourriez ajouter une vérification API ici
 
     return children;
 };

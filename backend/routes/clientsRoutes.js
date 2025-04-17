@@ -14,7 +14,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-
 // Ajoutez cette route pour récupérer les données du client connecté
 router.get('/me', async (req, res) => {
     try {

@@ -103,7 +103,7 @@ export default function ServiceDetails() {
         setApiError(null);
 
         try {
-            const response = await fetch('http://localhost:5000/api/services', {
+            const response = await fetch('http://localhost:5000/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -129,7 +129,7 @@ export default function ServiceDetails() {
                         address 
                     },
                     notes,
-                    status: "confirmed",
+                    status: "pending",
                     createdAt: new Date().toISOString(),
                     totalPrice: totalPrice
                 }),

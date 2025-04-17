@@ -126,7 +126,6 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
-
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/'); // Stocke les fichiers dans le dossier 'uploads'
@@ -141,7 +140,6 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
 });
  
-
 router.put("/profile", upload.single('photo'), async (req, res) => {
   try {
     const { userId, phone, address, cin, bio } = req.body;

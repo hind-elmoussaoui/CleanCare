@@ -15,7 +15,6 @@ router.post("/orders", async (req, res) => {
     }
 });
 
-
 router.get("/orders", async (req, res) => {
     try {
         console.log("📥 Requête GET reçue sur /orders"); // Log de vérification
@@ -27,6 +26,5 @@ router.get("/orders", async (req, res) => {
         res.status(500).json({ message: "Erreur serveur" });
     }
 });
-
 
 module.exports = router;

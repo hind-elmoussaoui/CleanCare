@@ -6,7 +6,6 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require("path");
 
-const serviceRoutes = require('./routes/servicesRoutes');
 const bookingRoutes = require('./routes/bookingsRoutes');
 const contactRoutes = require('./routes/contactsRoutes');
 const orderRoutes = require('./routes/ordersRoutes');
@@ -35,7 +34,6 @@ mongoose.connect(MONGO_URI)
 });
 
 // 🔹 Routes
-app.use('/api/services', serviceRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api', orderRoutes);

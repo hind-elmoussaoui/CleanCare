@@ -130,7 +130,7 @@ export default function BookingForm() {
           },
           notes,
           totalPrice,
-          status: "confirmed",
+          status: "pending",
           createdAt: new Date().toISOString()
         }),
       });

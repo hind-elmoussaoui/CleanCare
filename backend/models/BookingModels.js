@@ -4,15 +4,20 @@ const bookingSchema = new mongoose.Schema({
   service: {
     id: { type: Number, required: true },
     name: { type: String, required: true },
-    description: { type: String, required: true },
-    price: { type: String, required: true }
+    description: String,
+    price: { type: Number, required: true },
+    icon: String
   },
   schedule: {
-    frequency: { type: String, required: true, enum: ['une seule fois', 'plusieurs fois par semaine'] },
-    selectedDate: { type: Date },
-    startDate: { type: Date },
-    endDate: { type: Date },
-    selectedDays: [{ type: String }]
+    frequency: { 
+      type: String, 
+      required: true,
+      enum: ['une seule fois', 'plusieurs fois par semaine'] 
+    },
+    selectedDate: Date,
+    startDate: Date,
+    endDate: Date,
+    selectedDays: [String]
   },
   client: {
     name: { type: String, required: true },
@@ -20,24 +25,29 @@ const bookingSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     address: { type: String, required: true }
   },
-  notes: { type: String },
-  status: { type: String, default: 'confirmed', enum: ['confirmed', 'cancelled', 'completed'] },
-  totalPrice: Number,
-  createdAt: { type: Date, default: Date.now }
+  notes: String,
+  totalPrice: { type: Number, required: true },
+  status: { 
+    type: String, 
+    default: 'pending',
+    enum: [ 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] 
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
 });
 
-// Validation pour les réservations récurrentes
+// Middleware pour calculer le prix avant sauvegarde
 bookingSchema.pre('save', function(next) {
-  if (this.schedule.frequency === 'plusieurs fois par semaine') {
-    if (!this.schedule.startDate || !this.schedule.endDate || this.schedule.selectedDays.length === 0) {
-      throw new Error('Pour les réservations récurrentes, les dates de début/fin et les jours sont requis');
-    }
-    if (new Date(this.schedule.startDate) > new Date(this.schedule.endDate)) {
-      throw new Error('La date de début doit être avant la date de fin');
-    }
-  } else if (this.schedule.frequency === 'une seule fois' && !this.schedule.selectedDate) {
-    throw new Error('Pour une réservation unique, une date est requise');
+  if (this.schedule.frequency === 'une seule fois') {
+    this.totalPrice = this.service.price;
+  } else {
+    const start = this.schedule.startDate;
+    const end = this.schedule.endDate;
+    const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+    const weeks = Math.ceil(diffDays / 7);
+    this.totalPrice = weeks * this.schedule.selectedDays.length * this.service.price;
   }
+  this.updatedAt = Date.now();
   next();
 });
 
