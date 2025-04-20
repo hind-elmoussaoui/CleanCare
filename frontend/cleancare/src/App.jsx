@@ -26,6 +26,8 @@ import UserInterface from "./pages/CleanCare/UserInterface";
 import MoreInfo from './components/CleanCare/MoreInfo';
 import AboutDetails from "./components/CleanCare/AboutDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
+import ServiceDetail from "./components/CleanCare/ServicesDetails";
+import ServicesCarousel from "./components/CleanCare/ServicesCarousel";
 
 
 function App() {
@@ -77,6 +79,9 @@ function AppContent() {
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/user/dashboard" element={ <ProtectedRoute allowedRoles={['client', 'provider']}> <UserInterface /> </ProtectedRoute> } />
+          <Route path="/service" element={<ServicesCarousel />} />
+          <Route path="/service/:serviceId" element={<ServiceDetail />} />
+          
 
           {/* Routes du tableau de bord */}
           <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dash /></ProtectedRoute>} />

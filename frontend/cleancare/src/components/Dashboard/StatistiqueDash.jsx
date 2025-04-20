@@ -6,9 +6,9 @@ import {
   FiStar,
   FiClock,
   FiCheckCircle,
-  FiArrowRight,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import BookingChart from "./BookingChart";
 
 function StatistiqueDash() {
   const navigate = useNavigate();
@@ -365,9 +365,10 @@ function StatistiqueDash() {
                 <option>3 derniers mois</option>
               </select>
             </div>
-            <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400">
-              [Graphique des réservations]
-            </div>
+            <BookingChart
+              bookingStats={bookingStats}
+              lastReservations={lastReservations}
+            />
           </div>
 
           {/* Dernières réservations */}
