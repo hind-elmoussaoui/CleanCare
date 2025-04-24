@@ -139,47 +139,87 @@ const upload = multer({
     storage,
     limits: { fileSize: 5 * 1024 * 1024 }, // Limite de 5MB
 });
- 
+
 router.put("/profile", upload.single('photo'), async (req, res) => {
   try {
-    const { userId, phone, address, cin, bio } = req.body;
-
-    if (!userId) {
-      return res.status(400).json({ message: "userId requis" });
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Non autorisé' });
     }
 
-    const user = await User.findById(userId);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
 
-    user.phone = phone;
-    user.address = address;
-    user.cin = cin;
-    user.bio = bio;
+    // Mise à jour des champs
+    user.phone = req.body.phone || user.phone;
+    user.address = req.body.address || user.address;
+    user.cin = req.body.cin || user.cin;
+    user.bio = req.body.bio || user.bio;
 
+    // Mise à jour des champs spécifiques aux prestataires
     if (user.role === 'provider') {
-      user.experience = req.body.experience;
-      user.services = typeof req.body.services === 'string' 
-        ? req.body.services.split(',') 
-        : req.body.services;
+      user.experience = req.body.experience || user.experience;
+      user.services = req.body.services 
+        ? (typeof req.body.services === 'string' ? JSON.parse(req.body.services) : req.body.services)
+        : user.services;
     }
 
+    // Gestion de la photo
     if (req.file) {
       if (user.photo) {
         const oldPath = path.join(__dirname, '../uploads', user.photo);
         fs.unlink(oldPath, (err) => {
-          if (err) console.error('Erreur lors de la suppression de l\'ancienne photo:', err);
+          if (err) console.error('Erreur suppression photo:', err);
         });
       }
       user.photo = req.file.filename;
     }
 
     const updatedUser = await user.save();
-    res.status(200).json(updatedUser);
+    
+    // Retourner l'utilisateur complet sans le mot de passe
+    const userToReturn = updatedUser.toObject();
+    delete userToReturn.password;
+    
+    res.status(200).json(userToReturn);
+    
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur lors de la mise à jour du profil" });
+    res.status(500).json({ 
+      message: "Erreur lors de la mise à jour",
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+router.get('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Non autorisé' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.userId).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Ajouter l'URL complète de la photo si elle existe
+    const userObj = user.toObject();
+    if (user.photo) {
+      userObj.photoUrl = `http://localhost:5000/uploads/${user.photo}`;
+    }
+
+    res.json(userObj);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
   }
 });
 
@@ -262,20 +302,34 @@ router.get('/stats', async (req, res) => {
   }
 }); 
 
-// Backend - Route pour récupérer les données d'un utilisateur
-router.get("/profile/:userId", async (req, res) => {
+// GET /api/users/:id - Récupère un utilisateur spécifique
+router.get("/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId).select('-password'); 
+    const user = await User.findById(req.params.id).select('-password');
     if (!user) {
       return res.status(404).json({ message: "Utilisateur non trouvé" });
     }
     res.status(200).json(user);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Erreur lors de la récupération des données" });
+    res.status(500).json({ message: error.message });
   }
 });
- 
+
+// Dans votre backend (api/users.js)
+router.get("/", async (req, res) => {
+  try {
+    const { role } = req.query;
+    const filter = role ? { role } : {};
+    
+    const users = await User.find(filter).select('-password');
+    // Toujours retourner un tableau, même vide
+    res.status(200).json(users || []);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json([]); // En cas d'erreur, retourner un tableau vide
+  }
+});
+
 // Route pour obtenir tous les fournisseurs
 router.get("/", async (req, res) => {
     try {
@@ -284,6 +338,59 @@ router.get("/", async (req, res) => {
     } catch (error) {
         handleErrors(res, 500, "Error fetching user", error);
     }
+});
+
+// Mettre à jour les informations de base du profil (nom et email)
+router.put('/update-profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Non autorisé' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { name, email } = req.body;
+
+    // Validation des champs
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Le nom et l\'email sont obligatoires' });
+    }
+
+    const user = await User.findById(decoded.userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé' });
+    }
+
+    // Vérifier si l'email est déjà utilisé par un autre utilisateur
+    if (email !== user.email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: 'Cet email est déjà utilisé par un autre compte' });
+      }
+    }
+
+    // Mettre à jour les informations
+    user.name = name;
+    user.email = email;
+    
+    const updatedUser = await user.save();
+
+    // Retourner l'utilisateur mis à jour sans le mot de passe
+    const userToReturn = updatedUser.toObject();
+    delete userToReturn.password;
+    
+    res.json({ 
+      message: 'Profil mis à jour avec succès',
+      user: userToReturn
+    });
+
+  } catch (error) {
+    console.error(error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Token invalide' });
+    }
+    res.status(500).json({ message: 'Erreur serveur lors de la mise à jour du profil' });
+  }
 });
 
 // Mettre à jour le mot de passe

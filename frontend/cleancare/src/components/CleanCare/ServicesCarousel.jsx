@@ -71,16 +71,6 @@ export default function ServicesCarousel() {
     setCurrentIndex(index);
   };
 
-  const nextSlide = () => {
-    setTransitionDirection('right');
-    setCurrentIndex((prev) => (prev + itemsPerPage) % services.length);
-  };
-
-  const prevSlide = () => {
-    setTransitionDirection('left');
-    setCurrentIndex((prev) => (prev - itemsPerPage + services.length) % services.length);
-  };
-
   // Animation classes
   const getAnimationClass = () => {
     if (transitionDirection === 'right') {

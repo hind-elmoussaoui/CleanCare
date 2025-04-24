@@ -9,8 +9,6 @@ const path = require("path");
 const bookingRoutes = require('./routes/bookingsRoutes');
 const contactRoutes = require('./routes/contactsRoutes');
 const orderRoutes = require('./routes/ordersRoutes');
-const providerRoutes = require('./routes/providersRoutes');
-const clientRouter = require('./routes/clientsRoutes');
 const adminRoutes = require('./routes/adminsRoutes');
 const usersRoutes = require('./routes/userRoutes');
 const avisRoutes = require('./routes/avisRoutes');
@@ -37,8 +35,6 @@ mongoose.connect(MONGO_URI)
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/contacts', contactRoutes);
 app.use('/api', orderRoutes);
-app.use('/api/providers', providerRoutes);
-app.use('/api/clients', clientRouter);
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/avis', avisRoutes);

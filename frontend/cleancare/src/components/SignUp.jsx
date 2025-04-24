@@ -10,7 +10,7 @@ function SignUp() {
         name: "",
         email: "",
         password: "",
-        role: "client" // 'client' ou 'provider'
+        role: "user" // 'client' ou 'provider'
     });
 
     const handleChange = (e) => {
@@ -65,7 +65,7 @@ function SignUp() {
             // Redirection avec message
             navigate('/signin', { 
                 state: { 
-                    successMessage: `Inscription réussie en tant que ${formData.role === 'client' ? 'client' : 'provider'}!`,
+                    successMessage: `Inscription réussie en tant que ${formData.role === 'user' ? 'client' : 'provider'}!`,
                     registeredEmail: formData.email
                 }
             });

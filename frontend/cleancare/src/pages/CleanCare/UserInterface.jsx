@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaUser, FaSignOutAlt, FaHome, FaHistory, FaCog, FaBell, FaCalendarAlt, FaStar, FaPhone, FaMapMarkerAlt, FaInfoCircle, FaBriefcase, FaIdCard, FaCamera} from "react-icons/fa";
+import { FaUser, FaSignOutAlt, FaHome, FaHistory, FaCog, FaBell, FaCalendarAlt, FaStar, FaPhone, FaMapMarkerAlt, FaInfoCircle, FaBriefcase, FaIdCard, FaCamera, FaSave } from "react-icons/fa";
 import { FcServices } from "react-icons/fc";
 import { GiProgression } from "react-icons/gi";
 import axios from 'axios';
@@ -41,36 +41,49 @@ function UserInterface() {
   };
 
   useEffect(() => {
-    const userData = JSON.parse(localStorage.getItem("user"));
-    if (!userData || !localStorage.getItem("token")) {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await axios.get('http://localhost:5000/api/users/profile', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        
+        const userData = response.data;
+        setUser(userData);
+        
+        // Mettre à jour profileData avec les données du serveur
+        setProfileData({
+          phone: userData.phone || "",
+          address: userData.address || "",
+          bio: userData.bio || "",
+          services: userData.services || [],
+          newService: "",
+          experience: userData.experience || "",
+          cin: userData.cin || "",
+          photo: null,
+          photoPreview: userData.photo 
+            ? `http://localhost:5000/uploads/${userData.photo}` 
+            : "https://via.placeholder.com/150"
+        });
+        
+        setLoading(false);
+        
+      } catch (error) {
+        console.error("Erreur lors du chargement du profil:", error);
+        navigate("/signin");
+      }
+    };
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
       navigate("/signin");
       return;
     }
-
-    // Simuler des données de profil existantes
-    const mockProfileData = {
-      phone: userData.phone || "",
-      address: userData.address || "",
-      bio: userData.bio || "",
-      services: userData.services || [],
-      newService: "",
-      experience: userData.experience || "",
-      cin: userData.cin || "",
-      photo: userData.photo || null,
-      photoPreview: userData.photo ? URL.createObjectURL(userData.photo) : ""
-    };
-
-    setUser(userData);
-    setProfileData(mockProfileData);
-    setLoading(false);
-
-    if (location.state?.fromSignUp) {
-      setSuccessMessage(
-        `Bienvenue ${userData.name}! Votre compte ${userData.role} a été créé avec succès.`
-      );
-      setTimeout(() => setSuccessMessage(""), 5000);
-    }
-  }, [navigate, location]);
+  
+    fetchUserProfile();
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -113,24 +126,26 @@ function UserInterface() {
 
   const saveProfile = async () => {
     try {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-    const userId = user?.id;
-    
+      const token = localStorage.getItem("token");
       const formData = new FormData();
-      formData.append("userId", userId);
+      
+      // Ajouter tous les champs du profil
       formData.append("phone", profileData.phone);
       formData.append("address", profileData.address);
       formData.append("cin", profileData.cin);
       formData.append("bio", profileData.bio);
-      formData.append("experience", profileData.experience);
-      formData.append("services", JSON.stringify(profileData.services));
+      
+      if (user?.role === "provider") {
+        formData.append("experience", profileData.experience);
+        formData.append("services", JSON.stringify(profileData.services));
+      }
+      
       if (profileData.photo) {
         formData.append("photo", profileData.photo);
       }
   
       const response = await axios.put(
-        `http://localhost:5000/api/users/profile`, // ✅ backend route
+        `http://localhost:5000/api/users/profile`,
         formData,
         {
           headers: {
@@ -140,13 +155,20 @@ function UserInterface() {
         }
       );
   
-      console.log("Profil mis à jour:", response.data);
+      // Mettre à jour les données utilisateur après sauvegarde
+      setUser(response.data);
+      localStorage.setItem("user", JSON.stringify(response.data));
+      
+      setSuccessMessage("Profil mis à jour avec succès!");
+      setTimeout(() => setSuccessMessage(""), 5000);
+      
     } catch (error) {
-      console.error("Error during profile update:", error);
+      console.error("Erreur lors de la mise à jour du profil:", error);
+      setSuccessMessage("Erreur lors de la mise à jour du profil");
+      setTimeout(() => setSuccessMessage(""), 5000);
     }
   };
   
-
   if (loading) {
     return (
       <div
@@ -891,12 +913,13 @@ function UserInterface() {
               <div className="mt-8 text-center">
                 <button
                   onClick={saveProfile}
-                  className="px-8 py-3 rounded-md font-medium transition-all hover:shadow-md"
+                  className="px-8 py-3 rounded-md font-medium transition-all hover:shadow-md flex items-center justify-center mx-auto"
                   style={{
                     backgroundColor: colors.primary,
                     color: colors.textLight,
                   }}
                 >
+                  <FaSave className="mr-2" />
                   Enregistrer les modifications
                 </button>
               </div>

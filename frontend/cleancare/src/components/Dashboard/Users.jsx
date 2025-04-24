@@ -14,6 +14,13 @@ function Users() {
         role: "client"
     });
     const [hiddenPasswords, setHiddenPasswords] = useState({});
+    const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        userId: null,
+        userName: "",
+        userEmail: ""
+    });
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         fetchUsers();
@@ -35,10 +42,9 @@ function Users() {
             const data = await response.json();
             setUsers(data);
             
-            // Initialiser l'état de visibilité des mots de passe
             const initialHiddenState = {};
             data.forEach(user => {
-                initialHiddenState[user._id] = false;
+                initialHiddenState[user._id] = true;
             });
             setHiddenPasswords(initialHiddenState);
         } catch (error) {
@@ -83,7 +89,7 @@ function Users() {
 
             const data = await response.json();
             setUsers([...users, data.user]);
-            setHiddenPasswords(prev => ({ ...prev, [data.user._id]: false }));
+            setHiddenPasswords(prev => ({ ...prev, [data.user._id]: true }));
             setShowAddModal(false);
             setNewUser({ name: "", email: "", password: "", role: "client" });
         } catch (error) {
@@ -91,32 +97,42 @@ function Users() {
         }
     };
 
-    const handleDeleteUser = async (userId) => {
-        if (window.confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?")) {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch(`http://localhost:5000/api/admin/users/${userId}`, {
-                    method: "DELETE",
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+    const confirmDelete = (userId, userName, userEmail) => {
+        setDeleteModal({
+            isOpen: true,
+            userId,
+            userName,
+            userEmail
+        });
+    };
 
-                if (!response.ok) {
-                    throw new Error("Erreur lors de la suppression");
+    const handleDeleteUser = async () => {
+        setIsDeleting(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/admin/users/${deleteModal.userId}`, {
+                method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
+            });
 
-                setUsers(users.filter(user => user._id !== userId));
-                
-                // Mettre à jour l'état de visibilité
-                setHiddenPasswords(prev => {
-                    const newState = { ...prev };
-                    delete newState[userId];
-                    return newState;
-                });
-            } catch (error) {
-                setError(error.message);
+            if (!response.ok) {
+                throw new Error("Erreur lors de la suppression");
             }
+
+            setUsers(users.filter(user => user._id !== deleteModal.userId));
+            
+            setHiddenPasswords(prev => {
+                const newState = { ...prev };
+                delete newState[deleteModal.userId];
+                return newState;
+            });
+        } catch (error) {
+            setError(error.message);
+        } finally {
+            setIsDeleting(false);
+            setDeleteModal({ isOpen: false, userId: null, userName: "", userEmail: "" });
         }
     };
 
@@ -157,7 +173,7 @@ function Users() {
                         </h1>
                         <button 
                             onClick={() => setShowAddModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center transition-colors duration-200"
                         >
                             <FaPlus className="mr-2" /> Ajouter Utilisateur
                         </button>
@@ -177,32 +193,32 @@ function Users() {
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
                                     {users.map((user) => (
-                                        <tr key={user._id} className="hover:bg-gray-50">
+                                        <tr key={user._id} className="hover:bg-gray-50 transition-colors duration-150">
                                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">{user.name}</td>
                                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">{user.email}</td>
                                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800 flex items-center">
                                                 {hiddenPasswords[user._id] ? (
-                                                    <span className="mr-2">{user.password}</span>
-                                                ) : (
                                                     <span className="mr-2">••••••••</span>
+                                                ) : (
+                                                    <span className="mr-2 font-mono">{user.password}</span>
                                                 )}
                                                 <button 
                                                     onClick={() => togglePasswordVisibility(user._id)}
-                                                    className="text-gray-500 hover:text-gray-700"
-                                                    title={hiddenPasswords[user._id] ? "Masquer" : "Afficher"}
+                                                    className="text-gray-500 hover:text-gray-700 transition-colors duration-200"
+                                                    title={hiddenPasswords[user._id] ? "Afficher" : "Masquer"}
                                                 >
-                                                    {hiddenPasswords[user._id] ? <FaEye /> :  <FaEyeSlash />}
+                                                    {hiddenPasswords[user._id] ? <FaEyeSlash /> : <FaEye />}
                                                 </button>
                                             </td>
-                                            <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
-                                                <span className={`px-2 py-1 rounded-full text-xs ${getRoleColor(user.role)}`}> 
-                                                    {user.role}
+                                            <td className="px-4 py-3 whitespace-nowrap text-sm">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}> 
+                                                    {user.role === 'provider' ? 'Prestataire' : 'Client' }
                                                 </span>
                                             </td>
                                             <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-800">
                                                 <button 
-                                                    onClick={() => handleDeleteUser(user._id)}
-                                                    className="text-red-600 hover:text-red-800 mr-3"
+                                                    onClick={() => confirmDelete(user._id, user.name, user.email)}
+                                                    className="text-red-600 hover:text-red-800 mr-3 transition-colors duration-200"
                                                     title="Supprimer"
                                                 >
                                                     <FaTrash />
@@ -219,8 +235,8 @@ function Users() {
 
             {/* Modal d'ajout */}
             {showAddModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md transform transition-all duration-300 scale-95">
                         <h2 className="text-xl font-bold mb-4">Ajouter un Utilisateur</h2>
                         
                         <form onSubmit={handleAddUser}>
@@ -228,7 +244,7 @@ function Users() {
                                 <label className="block text-gray-700 text-sm font-bold mb-2">Nom complet</label>
                                 <input
                                     type="text"
-                                    className="w-full px-3 py-2 border rounded-md"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={newUser.name}
                                     onChange={(e) => setNewUser({...newUser, name: e.target.value})}
                                     required
@@ -239,7 +255,7 @@ function Users() {
                                 <label className="block text-gray-700 text-sm font-bold mb-2">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full px-3 py-2 border rounded-md"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={newUser.email}
                                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
                                     required
@@ -250,24 +266,25 @@ function Users() {
                                 <label className="block text-gray-700 text-sm font-bold mb-2">Mot de passe</label>
                                 <input
                                     type="text"
-                                    className="w-full px-3 py-2 border rounded-md"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={newUser.password}
                                     onChange={(e) => setNewUser({...newUser, password: e.target.value})}
                                     required
-                                    placeholder="Minimum 8 caractères"
+                                    minLength="6"
+                                    placeholder="Minimum 6 caractères"
                                 />
                             </div>
                             
-                            <div className="mb-4">
+                            <div className="mb-6">
                                 <label className="block text-gray-700 text-sm font-bold mb-2">Rôle</label>
                                 <select
-                                    className="w-full px-3 py-2 border rounded-md"
+                                    className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     value={newUser.role}
                                     onChange={(e) => setNewUser({...newUser, role: e.target.value})}
                                     required
                                 >
                                     <option value="client">Client</option>
-                                    <option value="provider">Provider</option>
+                                    <option value="provider">Prestataire</option>
                                 </select>
                             </div>
                             
@@ -275,18 +292,62 @@ function Users() {
                                 <button
                                     type="button"
                                     onClick={() => setShowAddModal(false)}
-                                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                                    className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors duration-200"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
-                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
                                 >
                                     Ajouter
                                 </button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de confirmation de suppression */}
+            {deleteModal.isOpen && (
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300">
+                    <div className="bg-white border border-red-500 rounded-lg p-6 w-full max-w-md transform transition-all duration-300 scale-95">
+                        <h2 className="text-xl font-bold mb-4 text-red-600">Confirmer la suppression</h2>
+                        <div className="mb-6">
+                            <p className="text-gray-700 mb-2">Vous êtes sur le point de supprimer l'utilisateur suivant :</p>
+                            <div className="bg-gray-100 p-3 rounded-md">
+                                <p className="font-medium">{deleteModal.userName}</p>
+                                <p className="text-sm text-gray-600">{deleteModal.userEmail}</p>
+                            </div>
+                            <p className="text-red-600 mt-3 font-medium">Cette action est irréversible.</p>
+                        </div>
+                        
+                        <div className="flex justify-end space-x-3">
+                            <button
+                                onClick={() => setDeleteModal({ isOpen: false, userId: null, userName: "", userEmail: "" })}
+                                className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-colors duration-200"
+                                disabled={isDeleting}
+                            >
+                                Annuler
+                            </button>
+                            <button
+                                onClick={handleDeleteUser}
+                                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-200 flex items-center justify-center"
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Suppression...
+                                    </>
+                                ) : (
+                                    "Confirmer la suppression"
+                                )}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

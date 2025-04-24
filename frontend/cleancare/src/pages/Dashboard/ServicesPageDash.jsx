@@ -5,10 +5,18 @@ const AdminDashboard = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [notification, setNotification] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [currentAction, setCurrentAction] = useState({ type: null, id: null, status: null });
 
   useEffect(() => {
     fetchReservations();
   }, []);
+
+  const showNotification = (message, isSuccess) => {
+    setNotification({ message, isSuccess });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const fetchReservations = async () => {
     try {
@@ -24,6 +32,7 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error("Erreur:", err);
       setError(err.message);
+      showNotification("Erreur lors du chargement des réservations", false);
     } finally {
       setLoading(false);
     }
@@ -43,40 +52,56 @@ const AdminDashboard = () => {
         throw new Error("Erreur lors de la mise à jour");
       }
 
-      // Mise à jour locale pour éviter un nouveau fetch
       setReservations(
         reservations.map((res) =>
           res._id === id ? { ...res, status: newStatus } : res
         )
       );
+
+      const statusMessages = {
+        confirmed: "Réservation confirmée avec succès",
+        in_progress: "Réservation marquée comme en cours",
+        completed: "Réservation marquée comme complétée",
+        cancelled: "Réservation annulée"
+      };
+
+      showNotification(statusMessages[newStatus] || "Statut mis à jour", true);
     } catch (err) {
       console.error("Erreur:", err);
-      setError(err.message);
+      showNotification("Échec de la mise à jour du statut", false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (
-      window.confirm("Êtes-vous sûr de vouloir supprimer cette réservation ?")
-    ) {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/bookings/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
+    try {
+      const response = await fetch(`http://localhost:5000/api/bookings/${id}`, {
+        method: "DELETE",
+      });
 
-        if (!response.ok) {
-          throw new Error("Erreur lors de la suppression");
-        }
-
-        setReservations(reservations.filter((item) => item._id !== id));
-      } catch (err) {
-        console.error("Erreur:", err);
-        setError(err.message);
+      if (!response.ok) {
+        throw new Error("Erreur lors de la suppression");
       }
+
+      setReservations(reservations.filter((item) => item._id !== id));
+      showNotification("Réservation supprimée avec succès", true);
+    } catch (err) {
+      console.error("Erreur:", err);
+      showNotification("Échec de la suppression de la réservation", false);
     }
+  };
+
+  const confirmAction = (type, id, status = null) => {
+    setCurrentAction({ type, id, status });
+    setShowConfirmModal(true);
+  };
+
+  const executeAction = () => {
+    if (currentAction.type === "delete") {
+      handleDelete(currentAction.id);
+    } else if (currentAction.type === "status") {
+      handleStatusChange(currentAction.id, currentAction.status);
+    }
+    setShowConfirmModal(false);
   };
 
   const formatDate = (dateString) => {
@@ -94,11 +119,82 @@ const AdminDashboard = () => {
     }
   };
 
+  const getActionMessage = () => {
+    if (currentAction.type === "delete") {
+      return "Êtes-vous sûr de vouloir supprimer cette réservation ? Cette action est irréversible.";
+    }
+    
+    const statusMessages = {
+      confirmed: "Confirmer cette réservation ?",
+      in_progress: "Marquer cette réservation comme 'en cours' ?",
+      completed: "Marquer cette réservation comme 'complétée' ?",
+      cancelled: "Annuler cette réservation ?"
+    };
+    
+    return statusMessages[currentAction.status] || "Confirmer cette action ?";
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
 
       <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        {/* Notification Toast */}
+        {notification && (
+          <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg flex items-center ${
+            notification.isSuccess ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+          }`}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className={`h-5 w-5 mr-2 ${notification.isSuccess ? "text-green-500" : "text-red-500"}`}
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              {notification.isSuccess ? (
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              ) : (
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              )}
+            </svg>
+            <span>{notification.message}</span>
+          </div>
+        )}
+
+        {/* Modal de confirmation */}
+        {showConfirmModal && (
+          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full border border-red-600">
+              <div className="flex items-center mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6 text-yellow-500 mr-2"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <h3 className="text-lg font-semibold">Confirmation requise</h3>
+              </div>
+              <p className="mb-4">{getActionMessage()}</p>
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowConfirmModal(false)}
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={executeAction}
+                  className="px-4 py-2 rounded-md text-white bg-red-600 hover:bg-red-700"
+                >
+                  Confirmer
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 md:mb-6">
           Toutes les Réservations
         </h1>
@@ -238,9 +334,7 @@ const AdminDashboard = () => {
                         {reservation.status === "pending" && (
                           <>
                             <button
-                              onClick={() =>
-                                handleStatusChange(reservation._id, "confirmed")
-                              }
+                              onClick={() => confirmAction("status", reservation._id, "confirmed")}
                               className="text-green-600 hover:text-green-800 p-1 rounded-full hover:bg-green-50"
                               title="Confirmer la réservation"
                             >
@@ -258,7 +352,7 @@ const AdminDashboard = () => {
                               </svg>
                             </button>
                             <button
-                              onClick={() => handleDelete(reservation._id)}
+                              onClick={() => confirmAction("delete", reservation._id)}
                               className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
                               title="Refuser la réservation"
                             >
@@ -280,9 +374,7 @@ const AdminDashboard = () => {
 
                         {reservation.status === "confirmed" && (
                           <button
-                            onClick={() =>
-                              handleStatusChange(reservation._id, "in_progress")
-                            }
+                            onClick={() => confirmAction("status", reservation._id, "in_progress")}
                             className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-50"
                             title="Marquer comme en cours"
                           >
@@ -303,9 +395,7 @@ const AdminDashboard = () => {
 
                         {reservation.status === "in_progress" && (
                           <button
-                            onClick={() =>
-                              handleStatusChange(reservation._id, "completed")
-                            }
+                            onClick={() => confirmAction("status", reservation._id, "completed")}
                             className="text-purple-600 hover:text-purple-800 p-1 rounded-full hover:bg-purple-50"
                             title="Marquer comme complété"
                           >
@@ -327,9 +417,7 @@ const AdminDashboard = () => {
                         {reservation.status !== "completed" &&
                           reservation.status !== "cancelled" && (
                             <button
-                              onClick={() =>
-                                handleStatusChange(reservation._id, "cancelled")
-                              }
+                              onClick={() => confirmAction("status", reservation._id, "cancelled")}
                               className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50 ml-2"
                               title="Annuler la réservation"
                             >
@@ -349,7 +437,7 @@ const AdminDashboard = () => {
                           )}
 
                         <button
-                          onClick={() => handleDelete(reservation._id)}
+                          onClick={() => confirmAction("delete", reservation._id)}
                           className="text-gray-600 hover:text-gray-800 p-1 rounded-full hover:bg-gray-50 ml-2"
                           title="Supprimer"
                         >

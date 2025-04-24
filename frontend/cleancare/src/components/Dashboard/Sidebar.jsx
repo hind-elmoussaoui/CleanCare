@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { 
   FiUsers, FiLogOut, FiMessageSquare, FiSettings, 
   FiShoppingCart, FiHome, FiPlusSquare, FiUser, 
@@ -8,8 +8,15 @@ import {
 
 function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("dashboard");
+
+  useEffect(() => {
+    // Détermine l'élément actif en fonction du chemin actuel
+    const currentPath = location.pathname.split('/').pop() || 'dashboard';
+    setActiveItem(currentPath);
+  }, [location]);
 
   const handleLogout = () => {
     localStorage.removeItem("isAdminAuthenticated");
@@ -29,16 +36,16 @@ function Sidebar() {
 
   return (
     <div className={`
-      sticky top-0 h-screen flex flex-col  // Changement ici (ajout de fixed)
+      sticky top-0 left-0 h-screen flex flex-col
       ${isOpen ? "w-64" : "w-20"} 
       bg-gradient-to-b from-indigo-900 to-indigo-950
       text-indigo-50 
       transition-all duration-300 ease-in-out 
       border-r border-indigo-800
-      z-50 // Assure que la sidebar est au-dessus du contenu
+      z-50
     `}>
       {/* Header */}
-      <div className="flex items-center justify-between p-2 border-b border-indigo-800">
+      <div className="flex items-center justify-between p-4 border-b border-indigo-800">
         {isOpen && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
@@ -56,20 +63,21 @@ function Sidebar() {
         </button>
       </div>
 
-      {/* Menu Items - Suppression de overflow-y-auto */}
+      {/* Menu Items */}
       <nav className="flex-1 py-4 px-2">
-        <ul className="space-y-1">
+        <ul className="space-y-2">
           {menuItems.map((item) => (
             <li key={item.key}>
               <Link 
                 to={item.path}
-                onClick={() => setActiveItem(item.key)}
                 className={`
                   flex items-center p-3 rounded-lg transition-all
                   ${activeItem === item.key 
                     ? 'bg-indigo-600 text-white shadow-md' 
                     : 'hover:bg-indigo-800/50 text-indigo-100 hover:text-white'}
+                  ${!isOpen ? 'justify-center' : ''}
                 `}
+                title={!isOpen ? item.label : ''}
               >
                 <span className={`${activeItem === item.key ? "text-white" : "text-indigo-300"}`}>
                   {item.icon}
@@ -82,13 +90,15 @@ function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-indigo-800">
+      <div className="p-1 border-t border-indigo-800">
         <button 
           onClick={handleLogout}
           className={`
             flex items-center w-full p-3 rounded-lg transition-colors
             hover:bg-rose-700/30 text-rose-300 hover:text-rose-100
+            ${!isOpen ? 'justify-center' : ''}
           `}
+          title={!isOpen ? "Déconnexion" : ''}
         >
           <FiLogOut className="text-lg" />
           {isOpen && <span className="ml-3">Déconnexion</span>}

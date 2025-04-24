@@ -77,7 +77,7 @@ function Header() {
 
             {/* Menu Mobile */}
             {isOpen && (
-                <div className="md:hidden absolute top-16 left-0 w-full bg-gradient-to-l from-[#a4bde7] to-white shadow-lg">
+                <div className="md:hidden absolute top-23 left-0 w-full bg-gradient-to-l from-[#a4bde7] to-white shadow-lg">
                     <ul className="flex flex-col items-center py-4 space-y-4 uppercase font-semibold text-lg text-[#0463a3]">
                         {navLinks.map((link) => (
                             <li key={link.to}>

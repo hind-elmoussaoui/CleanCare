@@ -1,8 +1,5 @@
 import React from "react";
-import { 
-  FaHome, FaSearch, FaBell, FaUserCircle, 
-  FaCog, FaChevronDown, FaQuestionCircle 
-} from "react-icons/fa";
+import { FaHome, FaSearch, FaBell, FaUserCircle, FaCog, FaChevronDown, FaQuestionCircle  } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 
 function NavDash() {

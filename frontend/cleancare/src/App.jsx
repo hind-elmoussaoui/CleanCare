@@ -13,14 +13,12 @@ import Dash from "./pages/Dashboard/Dash";
 import ServicesPage from "./pages/Dashboard/ServicesPageDash";
 import Messages from "./pages/Dashboard/MessagesPage";
 import ProfilePage from "./pages/Dashboard/ProfilePage";
-import OrderPage from "./pages/CleanCare/OrderForm";
+import OrderForm from "./pages/CleanCare/OrderForm";
 import ConfirmationPage from "./pages/CleanCare/ConfirmationPage";
 import OrderDashboard from "./components/Dashboard/OrderDashboard";
 import Users from "./components/Dashboard/Users";
 import GestionAvis from "./components/Dashboard/GestionAvis";
 import SignIn from "./components/SignIn";
-import ProviderDashboard from "./components/Dashboard/ProviderDashboard";
-import ClientDashboard from "./components/Dashboard/ClientDashboard";
 import SignUp from "./components/SignUp";
 import UserInterface from "./pages/CleanCare/UserInterface";
 import MoreInfo from './components/CleanCare/MoreInfo';
@@ -28,6 +26,7 @@ import AboutDetails from "./components/CleanCare/AboutDetails";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ServiceDetail from "./components/CleanCare/ServicesDetails";
 import ServicesCarousel from "./components/CleanCare/ServicesCarousel";
+import SettingsPage from "./components/Dashboard/SettingsPage";
 
 
 function App() {
@@ -49,12 +48,12 @@ function AppContent() {
     "/admin/dashboard/profile",
     "/admin/dashboard/orders",
     "/admin/dashboard/avis",
-    "/admin/dashboard/provider-dashboard",
     "/",
     "/services/:id",
     "/admin/dashboard/users",
     "/admin/dashboard",
-    "/user/dashboard"
+    "/user/dashboard",
+    "/admin/dashboard/settings"
   ];
 
   // Vérifie si la route actuelle est dans la liste des routes sans Navbar et Footer
@@ -70,7 +69,7 @@ function AppContent() {
           <Route path="/en-savoir-plus" element={<MoreInfo />} />
           <Route path="/details" element={<AboutDetails />} />
           <Route path="/services" element={<><Services /><PricingSection /></>} />
-          <Route path="/commande" element={<OrderPage />} />
+          <Route path="/commande" element={<OrderForm />} />
           <Route path="/confirmation" element={<ConfirmationPage />} />
           <Route path="/services/:id" element={<ServiceDetails />} />
           <Route path="/reservation" element={<BookingForm />} />
@@ -85,14 +84,13 @@ function AppContent() {
 
           {/* Routes du tableau de bord */}
           <Route path="/admin/dashboard" element={<ProtectedRoute allowedRoles={['admin']}><Dash /></ProtectedRoute>} />
-          <Route path="/admin/dashboard/services" element={<ServicesPage />} />
-          <Route path="/admin/dashboard/messages" element={<Messages />} />
-          <Route path="/admin/dashboard/profile" element={<ProfilePage />} />
-          <Route path="/admin/dashboard/orders" element={<OrderDashboard />} />
-          <Route path="/admin/dashboard/avis" element={<GestionAvis />} />
-          <Route path="/admin/dashboard/provider-dashboard" element={<ProviderDashboard />} />
-          <Route path="/admin/dashboard/client-dashboard" element={<ClientDashboard />} />
-          <Route path="/admin/dashboard/users" element={<Users />} />
+          <Route path="/admin/dashboard/services" element={<ProtectedRoute allowedRoles={['admin']}><ServicesPage /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/messages" element={<ProtectedRoute allowedRoles={['admin']}><Messages /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/profile" element={<ProtectedRoute allowedRoles={['admin']}><ProfilePage /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/orders" element={<ProtectedRoute allowedRoles={['admin']}><OrderDashboard /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/avis" element={<ProtectedRoute allowedRoles={['admin']}><GestionAvis /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/users" element={<ProtectedRoute allowedRoles={['admin']}><Users /></ProtectedRoute>} />
+          <Route path="/admin/dashboard/settings" element={<ProtectedRoute allowedRoles={['admin']}><SettingsPage /></ProtectedRoute>} />
         </Routes>
       </main>
       {shouldShowFooter && <Footer />}

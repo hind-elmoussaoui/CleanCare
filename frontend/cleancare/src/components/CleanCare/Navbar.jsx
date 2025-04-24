@@ -40,15 +40,15 @@ function Navbar() {
 
                 {/* Mobile Menu */}
                 {isOpen && (
-                    <div className="md:hidden absolute top-16 left-0 w-full bg-[#bfcee8] text-white shadow-lg">
+                    <div className="md:hidden absolute top-23 left-0 w-full text-[#0071bc] bg-gradient-to-l from-[#a4bde7] to-white shadow-lg">
                         <ul className="flex flex-col items-center py-4 space-y-4 uppercase font-semibold text-lg">
-                            <li><Link to="/" className="hover:text-[#719be5]" onClick={() => setIsOpen(false)}>ACCUEIL</Link></li>
-                            <li><Link to="/services" className="hover:text-[#719be5]" onClick={() => setIsOpen(false)}>SERVICES</Link></li>
-                            <li><Link to="/Avis" className="hover:text-[#719be5]" onClick={() => setIsOpen(false)}>AVIS</Link></li>
-                            <li><Link to="/contact" className="hover:text-[#719be5]" onClick={() => setIsOpen(false)}>CONTACT</Link></li>
+                            <li><Link to="/" className="hover:text-[#ed117f]" onClick={() => setIsOpen(false)}>ACCUEIL</Link></li>
+                            <li><Link to="/services" className="hover:text-[#ed117f]" onClick={() => setIsOpen(false)}>SERVICES</Link></li>
+                            <li><Link to="/Avis" className="hover:text-[#ed117f]" onClick={() => setIsOpen(false)}>AVIS</Link></li>
+                            <li><Link to="/contact" className="hover:text-[#ed117f]" onClick={() => setIsOpen(false)}>CONTACT</Link></li>
                             <li className="md:hidden">
                                 <Link 
-                                to="/signin" className="text-[#ed117f] hover:text-[#719be5] flex items-center justify-center space-x-2"
+                                to="/signin" className="text-[#ed117f] hover:text-white flex items-center justify-center space-x-2 bg-white/50 px-4 py-2 rounded-full transition-colors duration-200"
                                 >
                                     <FaUserAlt className="text-xl" /> 
                                     <span>Connexion</span> 

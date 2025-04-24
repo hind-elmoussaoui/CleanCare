@@ -95,7 +95,7 @@ export default function Services() {
                     </div>
                     ))}
                     <div className="relative mt-2 px-4 mb-4">
-                        <h1 className="text-3xl font-bold text-[#ed117f] mb-5">Nos Services</h1>
+                        <h1 className="text-3xl font-bold text-white mb-5">Nos Services</h1>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:ml-4 mb-4">
                             {servicesData.map((service) => (
                                 <div

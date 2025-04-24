@@ -13,7 +13,7 @@ function FooterDash() {
           {/* Branding */}
           <div className="mb-6 md:mb-0">
             <span className="flex items-center text-2xl font-semibold text-indigo-600 dark:text-indigo-400">
-              CleaἢCarἒ
+              Cleaɳ<span className='text-pink-500'>Care</span>
               <span className="ml-2 text-pink-500">(✿◡‿◡)</span>
             </span>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
@@ -91,7 +91,7 @@ function FooterDash() {
           <div className="flex items-center space-x-1 text-sm text-gray-500 dark:text-gray-400">
             <span>© 2025</span>
             <a href="#" className="hover:text-indigo-600 dark:hover:text-indigo-400">
-              CleaἢCarἒ
+            CleaɳCare
             </a>
             <span>Tous droits réservés</span>
           </div>
@@ -110,16 +110,6 @@ function FooterDash() {
           </div>
         </div>
 
-        {/* Made With Love */}
-        <div className="mt-4 text-center text-xs text-gray-500 dark:text-gray-400">
-          <p className="flex items-center justify-center">
-            <span>Made with</span>
-            <FiHeart className="mx-1 text-pink-500" />
-            <span>and</span>
-            <FiCode className="mx-1 text-indigo-500" />
-            <span>in morocco</span>
-          </p>
-        </div>
       </div>
     </footer>
   );

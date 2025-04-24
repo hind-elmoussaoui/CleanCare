@@ -4,31 +4,31 @@ import { useNavigate } from "react-router-dom"; // Import pour la navigation
 const plans = [
     {
         name: "Pack Essentiel",
-        price: "399",
+        price: "2999",
         features: ["Ménage quotidien", "Nettoyage des sols et poussières", "Poussières et sanitaires"],
         unavailable: ["Garde d'enfants", "Repassage", "Grand ménage", "Courses"],
-        buttonColor: "red",
+        buttonColor: "Plum Purple",
     },
     {
         name: "Pack Confort",
-        price: "599",
+        price: "4999",
         features: ["Ménage quotidien", "Nettoyage des sols et poussières", "Poussières et sanitaires", "Garde d'enfants (2h/jour)", "Repassage des vêtements"],
         unavailable: ["Grand ménage", "Courses"],
-        buttonColor: "red",
+        buttonColor: "Plum Purple",
     },
     {
         name: "Pack Premium",
-        price: "899",
+        price: "7999",
         features: ["Ménage quotidien", "Grand ménage", "Nettoyage des sols et poussières", "fenêtres", "tapis et rideaux"],
         unavailable: ["Garde d'enfants", "Repassage des vêtements"],
-        buttonColor: "yellow",
+        buttonColor: "Orchid Pink",
     },
     {
         name: "Pack Luxe",
-        price: "1299",
+        price: "11999",
         features: ["Ménage premium (8h/jour)", "Nettoyage intérieur/extérieur", "Garde d'enfants avec activités", "Repassage", "organisation des vêtements", "Courses et préparation des repas"],
         unavailable: [],
-        buttonColor: "red",
+        buttonColor: "Plum Purple",
     },
 ];
 
@@ -77,7 +77,7 @@ const PricingSection = () => {
                                     })
                                 }
                                 className={`py-2 w-full text-white font-semibold uppercase rounded-lg ${
-                                    plan.buttonColor === "yellow"
+                                    plan.buttonColor === "Orchid Pink"
                                         ? "bg-[#d15cb1] hover:bg-[#b565a0]"
                                         : "bg-[#9e588b] hover:bg-[#d15cb1]"
                                 } transition duration-300`}
