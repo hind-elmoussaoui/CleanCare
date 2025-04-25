@@ -66,7 +66,7 @@ function NavDash() {
               <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                 <FaUserCircle className="text-indigo-600 text-xl" />
               </div>
-              <span className="text-gray-700 hidden md:inline">Admin</span>
+              <span className="text-gray-700 hidden md:inline">Hind</span>
               <FaChevronDown className="text-gray-500 text-xs" />
             </button>
             

@@ -6,6 +6,7 @@ import Image3 from "../../assets/ménage.jpg";
 import TeamImage from "../../assets/be.jpg";
 import Image from "../../assets/pexels-timmossholder-1154738.jpg";
 import 'aos/dist/aos.css';
+import { Link } from 'react-router-dom';
 
 const AboutDetails = () => {
     // Initialize AOS
@@ -218,6 +219,7 @@ const AboutDetails = () => {
                     <p className="text-xl mb-8 max-w-4xl mx-auto">
                         Contactez-nous pour discuter de vos besoins et obtenir un service sur mesure.
                     </p>
+                    <Link to="/contact">
                     <button 
                         className="px-8 py-3 bg-white text-[#d15cb1] font-semibold rounded-lg shadow-md hover:bg-[#d15cb1] hover:text-white transition duration-300"
                         data-aos="zoom-in"
@@ -225,6 +227,7 @@ const AboutDetails = () => {
                     >
                         Nous Contacter
                     </button>
+                    </Link>
                 </div>
             </section>
         </div>

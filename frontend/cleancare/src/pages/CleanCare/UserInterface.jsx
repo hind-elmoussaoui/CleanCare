@@ -352,64 +352,7 @@ function UserInterface() {
             <FaHome className="mr-3" /> Tableau de bord
           </button>
 
-          <button
-            onClick={() => setActiveTab("services")}
-            className={`flex items-center w-full p-3 rounded-lg mb-1 transition-all ${
-              activeTab === "services"
-                ? "font-semibold"
-                : "opacity-90 hover:opacity-100"
-            }`}
-            style={{
-              backgroundColor:
-                activeTab === "services" ? colors.primary : "transparent",
-              color: colors.textLight,
-            }}
-          >
-            {user?.role === "client" ? (
-              <>
-                <FaCalendarAlt className="mr-3" /> Mes Rendez-vous
-              </>
-            ) : (
-              <>
-                <FcServices className="mr-3" /> Mes Services
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab("history")}
-            className={`flex items-center w-full p-3 rounded-lg mb-1 transition-all ${
-              activeTab === "history"
-                ? "font-semibold"
-                : "opacity-90 hover:opacity-100"
-            }`}
-            style={{
-              backgroundColor:
-                activeTab === "history" ? colors.primary : "transparent",
-              color: colors.textLight,
-            }}
-          >
-            <FaHistory className="mr-3" /> Historique
-          </button>
-
-          <button
-            onClick={() => setActiveTab("notifications")}
-            className={`flex items-center w-full p-3 rounded-lg mb-1 transition-all ${
-              activeTab === "notifications"
-                ? "font-semibold"
-                : "opacity-90 hover:opacity-100"
-            }`}
-            style={{
-              backgroundColor:
-                activeTab === "notifications" ? colors.primary : "transparent",
-              color: colors.textLight,
-            }}
-          >
-            <FaBell className="mr-3" /> Notifications
-          </button>
-        </nav>
-
-        <div className="mt-auto">
+        
           <button
             onClick={() => setActiveTab("profile")}
             className={`flex items-center w-full p-3 rounded-lg mb-1 transition-all ${
@@ -451,7 +394,7 @@ function UserInterface() {
           >
             <FaSignOutAlt className="mr-3" /> Déconnexion
           </button>
-        </div>
+          </nav>
       </div>
 
       {/* Main Content */}
@@ -469,10 +412,6 @@ function UserInterface() {
             style={{ color: colors.textDark }}
           >
             {activeTab === "dashboard" && "Tableau de bord"}
-            {activeTab === "services" &&
-            (user?.role === "client" ? "Mes Rendez-vous" : "Mes Services")}
-            {activeTab === "history" && "Historique"}
-            {activeTab === "notifications" && "Notifications"}
             {activeTab === "settings" && "Paramètres"}
             {activeTab === "profile" && "Profil"}
           </h2>
@@ -627,64 +566,6 @@ function UserInterface() {
                 </div>
               </div>
             </>
-          )}
-
-          {activeTab === "services" && (
-            <div
-              className="rounded-lg shadow p-6"
-              style={{ backgroundColor: colors.textLight }}
-            >
-              <h3
-                className="text-xl font-semibold mb-4"
-                style={{ color: colors.textDark }}
-              >
-                {user?.role === "client"
-                  ? "Mes Rendez-vous"
-                  : "Gestion des Services"}
-              </h3>
-              <p style={{ color: colors.textDark }}>
-                {user?.role === "client"
-                  ? "Liste de vos prochains rendez-vous avec nos prestataires"
-                  : "Gérez ici les services que vous proposez"}
-              </p>
-              {/* Contenu spécifique à implémenter */}
-            </div>
-          )}
-
-          {activeTab === "history" && (
-            <div
-              className="rounded-lg shadow p-6"
-              style={{ backgroundColor: colors.textLight }}
-            >
-              <h3
-                className="text-xl font-semibold mb-4"
-                style={{ color: colors.textDark }}
-              >
-                Historique
-              </h3>
-              <p style={{ color: colors.textDark }}>
-                {user?.role === "client"
-                  ? "Historique complet de vos demandes de service"
-                  : "Historique de vos interventions"}
-              </p>
-            </div>
-          )}
-
-          {activeTab === "notifications" && (
-            <div
-              className="rounded-lg shadow p-6"
-              style={{ backgroundColor: colors.textLight }}
-            >
-              <h3
-                className="text-xl font-semibold mb-4"
-                style={{ color: colors.textDark }}
-              >
-                Notifications
-              </h3>
-              <p style={{ color: colors.textDark }}>
-                Vous n'avez pas de nouvelles notifications
-              </p>
-            </div>
           )}
           
           {activeTab === "profile" && (

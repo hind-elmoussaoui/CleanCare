@@ -45,13 +45,13 @@ function Sidebar() {
       z-50
     `}>
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b border-indigo-800">
+      <div className="flex items-center justify-between p-2 border-b border-indigo-800">
         {isOpen && (
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold">A</span>
+              <span className="text-white font-bold">H</span>
             </div>
-            <h1 className="text-xl font-semibold">Admin</h1>
+            <h1 className="text-xl font-semibold">Hind</h1>
           </div>
         )}
         <button 

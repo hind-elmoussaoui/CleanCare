@@ -28,7 +28,7 @@ router.get("/orders", async (req, res) => {
 });
 
 // Dans votre fichier de routes (ex: routes/orders.js)
-router.delete('/:id', async (req, res) => {
+router.delete('/orders/:id', async (req, res) => {
     try {
         const order = await Order.findByIdAndDelete(req.params.id);
         
