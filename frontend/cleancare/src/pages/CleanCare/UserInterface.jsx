@@ -207,7 +207,7 @@ function UserInterface() {
                   className="text-3xl font-bold"
                   style={{ color: colors.primary }}
                 >
-                  5
+                  0
                 </p>
               </div>
               <div
@@ -220,7 +220,7 @@ function UserInterface() {
                 <h4 className="font-medium mb-2">Évaluations</h4>
                 <div className="flex items-center">
                   <FaStar className="text-yellow-500 mr-1" />
-                  <span className="text-3xl font-bold">4.8</span>
+                  <span className="text-3xl font-bold">0</span>
                   <span className="ml-1" style={{ color: colors.textDark }}>
                     /5
                   </span>
@@ -256,7 +256,7 @@ function UserInterface() {
                   className="text-3xl font-bold"
                   style={{ color: colors.primary }}
                 >
-                  2
+                  0
                 </p>
               </div>
               <div
@@ -271,7 +271,7 @@ function UserInterface() {
                   className="text-3xl font-bold"
                   style={{ color: colors.success }}
                 >
-                  5
+                  0
                 </p>
               </div>
               <div
@@ -286,7 +286,7 @@ function UserInterface() {
                   className="text-3xl font-bold"
                   style={{ color: colors.error }}
                 >
-                  1
+                  0
                 </p>
               </div>
             </div>
@@ -428,7 +428,7 @@ function UserInterface() {
                   color: colors.textLight,
                 }}
               >
-                3
+                0
               </span>
             </div>
           </div>
@@ -525,44 +525,6 @@ function UserInterface() {
                   Activité Récente
                 </h3>
                 <div className="space-y-4">
-                  <div
-                    className="border-b pb-4"
-                    style={{ borderColor: colors.light }}
-                  >
-                    <p
-                      className="text-sm mb-1"
-                      style={{ color: colors.secondary }}
-                    >
-                      Aujourd'hui, 10:30
-                    </p>
-                    <p
-                      className="font-medium"
-                      style={{ color: colors.textDark }}
-                    >
-                      {user?.role === "client"
-                        ? "Vous avez demandé un service de nounou"
-                        : "Nouvelle demande de service reçue"}
-                    </p>
-                  </div>
-                  <div
-                    className="border-b pb-4"
-                    style={{ borderColor: colors.light }}
-                  >
-                    <p
-                      className="text-sm mb-1"
-                      style={{ color: colors.secondary }}
-                    >
-                      Hier, 15:45
-                    </p>
-                    <p
-                      className="font-medium"
-                      style={{ color: colors.textDark }}
-                    >
-                      {user?.role === "client"
-                        ? "Votre rendez-vous avec femme de ménage Pro a été confirmé"
-                        : "Vous avez confirmé un rendez-vous avec saoud"}
-                    </p>
-                  </div>
                 </div>
               </div>
             </>

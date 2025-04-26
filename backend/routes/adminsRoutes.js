@@ -5,7 +5,7 @@ const User = require('../models/UserModels');
 const router = express.Router();
 
 // Constantes pour le premier admin
-const INITIAL_ADMIN_EMAIL = "hind6ah@gmail.com";
+const INITIAL_ADMIN_EMAIL = "hindel8@gmail.com";
 const INITIAL_ADMIN_PASSWORD = "admin@123"; // Mot de passe en clair
 
 // Vérifier et créer le premier admin au démarrage
@@ -194,6 +194,52 @@ router.delete('/users/:id', async (req, res) => {
       return res.status(404).json({ message: 'Utilisateur non trouvé' });
     }
     res.json({ message: 'Utilisateur supprimé avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Route pour mettre à jour le profil admin
+router.patch('/update-profile', async (req, res) => {
+  try {
+    const { email, nom } = req.body;
+    const admin = await Admin.findOne({ email: INITIAL_ADMIN_EMAIL });
+
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin non trouvé' });
+    }
+
+    admin.email = email || admin.email;
+    admin.nom = nom || admin.nom;
+
+    await admin.save();
+
+    res.json({ message: 'Profil mis à jour avec succès' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur' });
+  }
+});
+
+// Route pour changer le mot de passe
+router.patch('/change-password', async (req, res) => {
+  try {
+    const { ancienMotDePasse, nouveauMotDePasse } = req.body;
+    const admin = await Admin.findOne({ email: INITIAL_ADMIN_EMAIL });
+
+    if (!admin) {
+      return res.status(404).json({ message: 'Admin non trouvé' });
+    }
+
+    if (admin.password !== ancienMotDePasse) {
+      return res.status(400).json({ message: 'Ancien mot de passe incorrect' });
+    }
+
+    admin.password = nouveauMotDePasse;
+    await admin.save();
+
+    res.json({ message: 'Mot de passe mis à jour avec succès' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Erreur serveur' });

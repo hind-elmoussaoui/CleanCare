@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { FaArrowLeft, FaInfoCircle } from "react-icons/fa";
+import { FaArrowLeft, FaInfoCircle, FaCheck, FaTimes } from "react-icons/fa";
 
 const OrderPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { plan } = location.state || {}; // Récupérer le plan transmis
+    const { plan } = location.state || {};
 
-    // États pour les champs du formulaire
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -19,14 +18,17 @@ const OrderPage = () => {
     });
 
     const [errors, setErrors] = useState({});
+    const [submissionStatus, setSubmissionStatus] = useState({
+        loading: false,
+        success: false,
+        error: null,
+    });
 
-    // Gérer le changement des inputs
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
     };
 
-    // Vérifier si tous les champs obligatoires sont remplis
     const validateForm = () => {
         let newErrors = {};
         if (!formData.firstName.trim()) newErrors.firstName = "votre prénom";
@@ -40,54 +42,61 @@ const OrderPage = () => {
         return Object.keys(newErrors).length === 0;
     };
 
-    // Gérer la soumission du formulaire
     const handleSubmit = async (e) => {
         e.preventDefault();
     
-        if (validateForm()) {
+        if (!validateForm()) {
+            setSubmissionStatus({
+                loading: false,
+                success: false,
+                error: "Veuillez remplir tous les champs obligatoires.",
+            });
+            return;
+        }
+
+        setSubmissionStatus({ loading: true, success: false, error: null });
+
+        try {
+            const planData = {
+                ...plan,
+                price: parseFloat(plan.price.replace(" MAD", "")),
+            };
+
+            const response = await fetch("http://localhost:5000/api/orders", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ...formData, plan: planData }),
+            });
+
+            const text = await response.text();
+            let data;
+            
             try {
-                const planData = {
-                    ...plan,
-                    price: parseFloat(plan.price.replace(" MAD", "")), // Convertir le prix en nombre
-                };
-    
-                const response = await fetch("http://localhost:5000/api/orders", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ ...formData, plan: planData }),
-                });
-    
-                console.log("Statut HTTP :", response.status);
-    
-                const text = await response.text();
-                console.log("Réponse brute du serveur :", text);
-    
-                try {
-                    const data = JSON.parse(text);
-                    console.log("Données reçues :", data);
-    
-                    if (response.ok) {
-                        alert("Commande enregistrée avec succès !");
-                        navigate("/confirmation", { state: { formData, plan } });
-                    } else {
-                        alert(`Erreur : ${data.message || "Erreur inconnue"}`);
-                    }
-                } catch (error) {
-                    console.error("Erreur de parsing JSON :", error);
-                    alert(`Erreur lors de l'enregistrement. Réponse du serveur: ${text}`);
-                }
-            } catch (error) {
-                console.error("Erreur serveur :", error);
-                alert("Impossible de contacter le serveur.");
+                data = JSON.parse(text);
+            } catch {
+                throw new Error(text || "Réponse invalide du serveur");
             }
-        } else {
-            alert("Veuillez remplir tous les champs obligatoires.");
+
+            if (response.ok) {
+                setSubmissionStatus({ loading: false, success: true, error: null });
+                setTimeout(() => {
+                    navigate("/confirmation", { state: { formData, plan } });
+                }, 1500); // Redirection après 1.5s pour laisser voir le message
+            } else {
+                throw new Error(data.message || "Erreur lors de l'enregistrement");
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
+            setSubmissionStatus({
+                loading: false,
+                success: false,
+                error: error.message || "Une erreur est survenue. Veuillez réessayer.",
+            });
         }
     };
-    
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
-            {/* Bouton de retour flottant */}
             <button
                 onClick={() => navigate(-1)}
                 className="fixed top-8 left-20 flex items-center text-gray-500 hover:text-blue-500"
@@ -96,7 +105,6 @@ const OrderPage = () => {
             </button>
 
             <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-4xl flex gap-8">
-                {/* Section des informations du service (à gauche) */}
                 {plan && (
                     <div className="flex-1 p-6 bg-gray-50 rounded-lg">
                         <div className="flex items-center mb-4">
@@ -118,12 +126,34 @@ const OrderPage = () => {
                                 <li key={i} className="flex items-center mb-2 line-through opacity-50">❌ {feature}</li>
                             ))}
                         </ul>
-                    </div>
+                        </div>
                 )}
 
-                {/* Formulaire de commande (à droite) */}
                 <div className="flex-1">
                     <h2 className="text-2xl font-bold mb-4 text-center">Détails de facturation</h2>
+                    
+                    {/* Message de statut */}
+                    {submissionStatus.loading && (
+                        <div className="mb-4 p-3 bg-blue-100 text-blue-700 rounded-lg flex items-center">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-700 mr-2"></div>
+                            Envoi en cours...
+                        </div>
+                    )}
+                    
+                    {submissionStatus.success && (
+                        <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-lg flex items-center">
+                            <FaCheck className="mr-2" />
+                            Commande enregistrée avec succès !
+                        </div>
+                    )}
+                    
+                    {submissionStatus.error && (
+                        <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg flex items-center">
+                            <FaTimes className="mr-2" />
+                            {submissionStatus.error}
+                        </div>
+                    )}
+
                     <form onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
@@ -214,11 +244,13 @@ const OrderPage = () => {
                         <button
                             type="submit"
                             className={`w-full py-2 rounded-lg text-white font-bold transition duration-300 ${
-                                Object.keys(errors).length === 0 ? "bg-blue-500 hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed"
+                                submissionStatus.loading 
+                                    ? "bg-blue-300 cursor-not-allowed" 
+                                    : "bg-blue-500 hover:bg-blue-600"
                             }`}
-                            disabled={Object.keys(errors).length !== 0}
+                            disabled={submissionStatus.loading}
                         >
-                            Valider la commande
+                            {submissionStatus.loading ? "Envoi en cours..." : "Valider la commande"}
                         </button>
                     </form>
                 </div>
