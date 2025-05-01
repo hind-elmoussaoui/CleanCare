@@ -93,11 +93,11 @@ function SignIn() {
       </div>
 
       {/* Formulaire de connexion centré */}
-      <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-md w-full z-20 mt-20 mb-4">
-        <h1 className="text-2xl font-bold text-center mb-6">Connexion</h1>
+      <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-lg max-w-md w-full z-20 mt-20 mb-12">
+        <h1 className="text-2xl font-bold text-center mb-2">Connexion</h1>
 
         {/* Icônes de connexion sociale */}
-        <div className="flex justify-center space-x-4 mb-4">
+        <div className="flex justify-center space-x-4 mb-2">
           <button className="p-2 bg-white rounded-full border border-gray-200 shadow-sm">
             <FaFacebook size={20} className="text-blue-600" />
           </button>
@@ -109,7 +109,7 @@ function SignIn() {
           </button>
         </div>
 
-        <div className="text-center mb-4 text-sm text-gray-500">
+        <div className="text-center mb-2 text-sm text-gray-500">
           Ou connectez-vous avec votre email
         </div>
 
