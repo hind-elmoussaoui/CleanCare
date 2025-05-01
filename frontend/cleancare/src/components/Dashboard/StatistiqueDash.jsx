@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  FiUsers,
-  FiCalendar,
-  FiDollarSign,
-  FiStar,
-  FiClock,
-  FiCheckCircle,
-} from "react-icons/fi";
+import { FiUsers, FiCalendar, FiStar, FiClock, FiCheckCircle } from "react-icons/fi";
+import { GiReceiveMoney } from "react-icons/gi";
 import { useNavigate } from "react-router-dom";
 import BookingChart from "./BookingChart";
 
@@ -149,7 +143,7 @@ function StatistiqueDash() {
       title: "Revenu mensuel",
       value: `${bookingStats.monthlyRevenue?.toLocaleString() || 0} MAD`,
       change: "+18%",
-      icon: <FiDollarSign className="text-purple-500" size={24} />,
+      icon: <GiReceiveMoney className="text-purple-500" size={24} />,
       bgColor: "bg-purple-50",
     },
     {
