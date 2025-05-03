@@ -21,6 +21,10 @@ const UserSchema = new mongoose.Schema({
     enum: ['client', 'admin', 'provider'],
     default: 'client'
   },
+  validated: {
+    type: Boolean,
+    default: false
+  },  
   phone: String,
   address: String,
   cin: String,
@@ -33,7 +37,11 @@ const UserSchema = new mongoose.Schema({
     type: String,
     enum: ['active', 'inactive'],
     default: 'active'
-  }
+  },
+  validated: {
+    type: Boolean,
+    default: false
+  }  
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', UserSchema);

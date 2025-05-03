@@ -316,19 +316,27 @@ router.get("/:id", async (req, res) => {
 });
 
 // Dans votre backend (api/users.js)
-router.get("/", async (req, res) => {
+// GET /api/users
+router.get('/', async (req, res) => {
   try {
-    const { role } = req.query;
-    const filter = role ? { role } : {};
-    
-    const users = await User.find(filter).select('-password');
-    // Toujours retourner un tableau, même vide
-    res.status(200).json(users || []);
+    const { role, validated } = req.query;
+    const filter = {};
+
+    if (role) filter.role = role;
+
+    if (validated !== undefined) {
+      // Convertir validated à Boolean
+      if (validated === 'true') filter.validated = true;
+      else if (validated === 'false') filter.validated = false;
+    }
+
+    const users = await User.find(filter);
+    res.json(users);
   } catch (error) {
-    console.error(error);
-    res.status(500).json([]); // En cas d'erreur, retourner un tableau vide
+    res.status(500).json({ message: error.message });
   }
 });
+
 
 // Route pour obtenir tous les fournisseurs
 router.get("/", async (req, res) => {
@@ -338,6 +346,20 @@ router.get("/", async (req, res) => {
     } catch (error) {
         handleErrors(res, 500, "Error fetching user", error);
     }
+});
+
+// Dans votre fichier de routes users (backend)
+router.patch('/validate/:id',  async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { validated: req.body.validated },
+      { new: true }
+    );
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 });
 
 // Mettre à jour les informations de base du profil (nom et email)
