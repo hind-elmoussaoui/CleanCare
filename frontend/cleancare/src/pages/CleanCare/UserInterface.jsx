@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { FaUser, FaSignOutAlt, FaHome, FaHistory, FaCog, FaBell, FaCalendarAlt, FaStar, FaPhone, FaMapMarkerAlt, FaInfoCircle, FaBriefcase, FaIdCard, FaCamera, FaSave } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaUser, FaSignOutAlt, FaHome, FaCog, FaBell, FaStar, FaPhone, FaMapMarkerAlt, FaInfoCircle, FaBriefcase, FaIdCard, FaCamera, FaSave, FaCalendarAlt } from "react-icons/fa";
 import { FcServices } from "react-icons/fc";
 import { GiProgression } from "react-icons/gi";
-import axios from 'axios';
-
+import axios from "axios";
 
 function UserInterface() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [successMessage, setSuccessMessage] = useState("");
+  const [recentBookings, setRecentBookings] = useState([]);
+  const [loadingRecent, setLoadingRecent] = useState(false);
   const [profileData, setProfileData] = useState({
     phone: "",
     address: "",
@@ -22,7 +22,7 @@ function UserInterface() {
     experience: "",
     cin: "",
     photo: null,
-    photoPreview: ""
+    photoPreview: "",
   });
 
   // Nouvelle palette de couleurs professionnelle
@@ -44,15 +44,18 @@ function UserInterface() {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await axios.get('http://localhost:5000/api/users/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`
+        const response = await axios.get(
+          "http://localhost:5000/api/users/profile",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-        });
-        
+        );
+
         const userData = response.data;
         setUser(userData);
-        
+
         // Mettre à jour profileData avec les données du serveur
         setProfileData({
           phone: userData.phone || "",
@@ -63,25 +66,24 @@ function UserInterface() {
           experience: userData.experience || "",
           cin: userData.cin || "",
           photo: null,
-          photoPreview: userData.photo 
-            ? `http://localhost:5000/uploads/${userData.photo}` 
-            : "https://via.placeholder.com/150"
+          photoPreview: userData.photo
+            ? `http://localhost:5000/uploads/${userData.photo}`
+            : "https://via.placeholder.com/150",
         });
-        
+
         setLoading(false);
-        
       } catch (error) {
         console.error("Erreur lors du chargement du profil:", error);
         navigate("/signin");
       }
     };
-  
+
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/signin");
       return;
     }
-  
+
     fetchUserProfile();
   }, [navigate]);
 
@@ -99,10 +101,10 @@ function UserInterface() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setProfileData(prev => ({
+      setProfileData((prev) => ({
         ...prev,
         photo: file,
-        photoPreview: URL.createObjectURL(file)
+        photoPreview: URL.createObjectURL(file),
       }));
     }
   };
@@ -128,22 +130,22 @@ function UserInterface() {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      
+
       // Ajouter tous les champs du profil
       formData.append("phone", profileData.phone);
       formData.append("address", profileData.address);
       formData.append("cin", profileData.cin);
       formData.append("bio", profileData.bio);
-      
+
       if (user?.role === "provider") {
         formData.append("experience", profileData.experience);
         formData.append("services", JSON.stringify(profileData.services));
       }
-      
+
       if (profileData.photo) {
         formData.append("photo", profileData.photo);
       }
-  
+
       const response = await axios.put(
         `http://localhost:5000/api/users/profile`,
         formData,
@@ -154,21 +156,60 @@ function UserInterface() {
           },
         }
       );
-  
+
       // Mettre à jour les données utilisateur après sauvegarde
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data));
-      
+
       setSuccessMessage("Profil mis à jour avec succès!");
       setTimeout(() => setSuccessMessage(""), 5000);
-      
     } catch (error) {
       console.error("Erreur lors de la mise à jour du profil:", error);
       setSuccessMessage("Erreur lors de la mise à jour du profil");
       setTimeout(() => setSuccessMessage(""), 5000);
     }
   };
+
+  const fetchRecentBookings = async () => {
+    try {
+      setLoadingRecent(true);
+      const token = localStorage.getItem("token");
+      
+      // Vérifier d'abord si le compte est validé
+      const profileResponse = await axios.get(
+        "http://localhost:5000/api/users/profile",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
   
+      const userData = profileResponse.data;
+      
+      // Si l'utilisateur est un prestataire non validé, ne pas faire la requête
+      if (userData.role === "provider" && !userData.validated) {
+        setRecentBookings([]);
+        setLoadingRecent(false);
+        return;
+      }
+  
+      // Si validé ou client, faire la requête normale
+      const response = await axios.get(
+        "http://localhost:5000/api/bookings/last",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      setRecentBookings(response.data);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des réservations récentes:", error);
+    } finally {
+      setLoadingRecent(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.role === "provider") {
+      fetchRecentBookings();
+    }
+  }, [user?.role]);
+
   if (loading) {
     return (
       <div
@@ -352,7 +393,6 @@ function UserInterface() {
             <FaHome className="mr-3" /> Tableau de bord
           </button>
 
-        
           <button
             onClick={() => setActiveTab("profile")}
             className={`flex items-center w-full p-3 rounded-lg mb-1 transition-all ${
@@ -394,7 +434,7 @@ function UserInterface() {
           >
             <FaSignOutAlt className="mr-3" /> Déconnexion
           </button>
-          </nav>
+        </nav>
       </div>
 
       {/* Main Content */}
@@ -511,43 +551,164 @@ function UserInterface() {
 
           {/* Dynamic Content Based on Tab */}
           {activeTab === "dashboard" && (
+
             <>
               {renderRoleSpecificContent()}
-
-              <div
-                className="mt-6 rounded-lg shadow p-6"
-                style={{ backgroundColor: colors.textLight }}
-              >
-                <h3
-                  className="text-xl font-semibold mb-4"
-                  style={{ color: colors.textDark }}
+              {user?.role === "provider" && (
+                <div
+                  className="mt-6 rounded-lg shadow p-6"
+                  style={{ backgroundColor: colors.textLight }}
                 >
-                  Activité Récente
-                </h3>
-                <div className="space-y-4">
+                  <h3
+                    className="text-xl font-semibold mb-4"
+                    style={{ color: colors.textDark }}
+                  >
+                    Activité Récente
+                  </h3>
+                  <div className="space-y-4">
+                  {!user.validated ? (
+                    <div className="text-center py-4">
+        <p style={{ color: colors.secondary }}>
+          Votre compte prestataire est en attente de validation par l'administration.
+        </p>
+        <p style={{ color: colors.secondary }}>
+          Vous pourrez voir vos réservations une fois votre compte validé.
+        </p>
+      </div>
+    ) : loadingRecent ? (
+                      <div className="flex justify-center items-center py-4">
+                        <div
+                          className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2"
+                          style={{ borderColor: colors.primary }}
+                        ></div>
+                      </div>
+                    ) : recentBookings.length === 0 ? (
+                      <p
+                        className="text-center py-4"
+                        style={{ color: colors.secondary }}
+                      >
+                        Aucune activité récente
+                      </p>
+                    ) : (
+                      recentBookings.map((booking) => (
+                        <div
+                          key={booking._id}
+                          className="p-4 rounded-lg border flex items-start"
+                          style={{
+                            borderColor: colors.lightBlue,
+                            backgroundColor: colors.highlight,
+                          }}
+                        >
+                          <div
+                            className="p-2 rounded-full mr-3"
+                            style={{ backgroundColor: colors.lightBlue }}
+                          >
+                            <FaCalendarAlt style={{ color: colors.primary }} />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex justify-between">
+                              <h4
+                                className="font-medium"
+                                style={{ color: colors.textDark }}
+                              >
+                                {booking.service.name}
+                              </h4>
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  booking.status === "completed"
+                                    ? "bg-green-100 text-green-800"
+                                    : booking.status === "in_progress"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-gray-100 text-gray-800"
+                                }`}
+                              >
+                                {booking.status === "completed"
+                                  ? "Terminé"
+                                  : booking.status === "in_progress"
+                                  ? "En cours"
+                                  : "En attente"}
+                              </span>
+                            </div>
+                            <p
+                              className="text-sm mt-1"
+                              style={{ color: colors.secondary }}
+                            >
+                              Client: {booking.client.name}
+                            </p>
+                            <p
+                              className="text-sm"
+                              style={{ color: colors.textDark }}
+                            >
+                              {new Date(
+                                booking.schedule.selectedDate ||
+                                  booking.schedule.startDate
+                              ).toLocaleDateString("fr-FR", {
+                                weekday: "long",
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </p>
+                            <div className="mt-2 flex justify-between items-center">
+                              <span
+                                className="text-sm font-medium"
+                                style={{ color: colors.primary }}
+                              >
+                                {booking.service.price} €
+                              </span>
+                              <button
+                                onClick={() =>
+                                  navigate(`/bookings/${booking._id}`)
+                                }
+                                className="text-sm px-3 py-1 rounded"
+                                style={{
+                                  backgroundColor: colors.primary,
+                                  color: colors.textLight,
+                                }}
+                              >
+                                Voir détails
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           )}
-          
+
           {activeTab === "profile" && (
-            <div className="rounded-lg shadow p-6" style={{ backgroundColor: colors.textLight }}>
-              <h3 className="text-xl font-semibold mb-6" style={{ color: colors.textDark }}>
+            <div
+              className="rounded-lg shadow p-6"
+              style={{ backgroundColor: colors.textLight }}
+            >
+              <h3
+                className="text-xl font-semibold mb-6"
+                style={{ color: colors.textDark }}
+              >
                 <FaUser className="inline mr-2" /> Mon Profil Complet
               </h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Section Informations de base (pour tous les utilisateurs) */}
                 <div>
-                  <h4 className="text-lg font-medium mb-4 flex items-center" style={{ color: colors.primary }}>
+                  <h4
+                    className="text-lg font-medium mb-4 flex items-center"
+                    style={{ color: colors.primary }}
+                  >
                     <FaInfoCircle className="mr-2" /> Informations Personnelles
                   </h4>
-                  
+
                   {/* Photo de profil */}
                   <div className="mb-4 flex flex-col items-center">
                     <div className="relative mb-2">
                       <img
-                        src={profileData.photoPreview || "https://via.placeholder.com/150"}
+                        src={
+                          profileData.photoPreview ||
+                          "https://via.placeholder.com/150"
+                        }
                         alt="Photo de profil"
                         className="w-32 h-32 rounded-full object-cover border-2"
                         style={{ borderColor: colors.primary }}
@@ -562,18 +723,23 @@ function UserInterface() {
                         />
                       </label>
                     </div>
-                    <p className="text-sm text-gray-500">Cliquez sur l'icône pour changer la photo</p>
+                    <p className="text-sm text-gray-500">
+                      Cliquez sur l'icône pour changer la photo
+                    </p>
                   </div>
 
                   <div className="space-y-4">
                     {/* Nom et Email (lecture seule) */}
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         Nom complet
                       </label>
                       <input
                         type="text"
-                        value={profileData.name || user?.name || ''}
+                        value={profileData.name || user?.name || ""}
                         readOnly
                         className="w-full p-3 rounded-md border bg-gray-100"
                         style={{ borderColor: colors.lightBlue }}
@@ -581,12 +747,15 @@ function UserInterface() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         Email
                       </label>
                       <input
                         type="email"
-                        value={profileData.email || user?.email || ''}
+                        value={profileData.email || user?.email || ""}
                         readOnly
                         className="w-full p-3 rounded-md border bg-gray-100"
                         style={{ borderColor: colors.lightBlue }}
@@ -594,7 +763,10 @@ function UserInterface() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         <FaPhone className="inline mr-2" /> Téléphone
                       </label>
                       <input
@@ -612,7 +784,10 @@ function UserInterface() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         <FaMapMarkerAlt className="inline mr-2" /> Adresse
                       </label>
                       <input
@@ -630,7 +805,10 @@ function UserInterface() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         <FaIdCard className="inline mr-2" /> Numéro CIN
                       </label>
                       <input
@@ -648,7 +826,10 @@ function UserInterface() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                      <label
+                        className="block text-sm font-medium mb-1"
+                        style={{ color: colors.textDark }}
+                      >
                         Bio / Description
                       </label>
                       <textarea
@@ -670,13 +851,29 @@ function UserInterface() {
                 {/* Section spécifique aux prestataires */}
                 {user?.role === "provider" && (
                   <div>
-                    <h4 className="text-lg font-medium mb-4 flex items-center" style={{ color: colors.primary }}>
-                      <FaBriefcase className="mr-2" /> Informations Professionnelles
+                    <h4
+                      className="text-lg font-medium mb-4 flex items-center"
+                      style={{ color: colors.primary }}
+                    >
+                      <FaBriefcase className="mr-2" /> Informations
+                      Professionnelles
                     </h4>
-                    
+
+                    {/* Ajoutez l'indicateur de validation ici */}
+                    <div className="mb-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        user.validated ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
+                      }`}>
+                        {user.validated ? "Compte validé" : "En attente de validation"}
+                      </span>
+                    </div>
+
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                        <label
+                          className="block text-sm font-medium mb-1"
+                          style={{ color: colors.textDark }}
+                        >
                           Années d'expérience
                         </label>
                         <input
@@ -695,14 +892,22 @@ function UserInterface() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium mb-1" style={{ color: colors.textDark }}>
+                        <label
+                          className="block text-sm font-medium mb-1"
+                          style={{ color: colors.textDark }}
+                        >
                           Services proposés
                         </label>
                         <div className="flex mb-2">
                           <input
                             name="sevices"
                             value={profileData.newService}
-                            onChange={(e) => setProfileData({...profileData, newService: e.target.value})}
+                            onChange={(e) =>
+                              setProfileData({
+                                ...profileData,
+                                newService: e.target.value,
+                              })
+                            }
                             className="flex-1 p-3 rounded-l-md border focus:ring-2 focus:outline-none transition-all"
                             style={{
                               borderColor: colors.lightBlue,
@@ -722,16 +927,18 @@ function UserInterface() {
                             Ajouter
                           </button>
                         </div>
-                        
+
                         <div className="space-y-2">
                           {profileData.services.length > 0 ? (
                             profileData.services.map((service, index) => (
-                              <div 
-                                key={index} 
+                              <div
+                                key={index}
                                 className="flex justify-between items-center p-3 rounded-md"
                                 style={{ backgroundColor: colors.highlight }}
                               >
-                                <span style={{ color: colors.textDark }}>{service}</span>
+                                <span style={{ color: colors.textDark }}>
+                                  {service}
+                                </span>
                                 <button
                                   onClick={() => removeService(index)}
                                   className="text-red-500 hover:text-red-700"
@@ -741,7 +948,10 @@ function UserInterface() {
                               </div>
                             ))
                           ) : (
-                            <p className="text-sm italic" style={{ color: colors.secondary }}>
+                            <p
+                              className="text-sm italic"
+                              style={{ color: colors.secondary }}
+                            >
                               Aucun service ajouté pour le moment
                             </p>
                           )}

@@ -14,9 +14,9 @@ const bookingSchema = new mongoose.Schema({
       required: true,
       enum: ['une seule fois', 'plusieurs fois par semaine'] 
     },
-    selectedDate: Date,
-    startDate: Date,
-    endDate: Date,
+    selectedDate: { type: String },
+    startDate: { type: String },
+    endDate: { type: String },
     selectedDays: [String]
   },
   client: {
@@ -41,8 +41,8 @@ bookingSchema.pre('save', function(next) {
   if (this.schedule.frequency === 'une seule fois') {
     this.totalPrice = this.service.price;
   } else {
-    const start = this.schedule.startDate;
-    const end = this.schedule.endDate;
+    const start = new Date(this.schedule.startDate);
+    const end = new Date(this.schedule.endDate);
     const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
     const weeks = Math.ceil(diffDays / 7);
     this.totalPrice = weeks * this.schedule.selectedDays.length * this.service.price;

@@ -102,9 +102,6 @@ function FooterDash() {
               <FiGithub className="w-5 h-5" />
             </a>
             <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
-              <FiTwitter className="w-5 h-5" />
-            </a>
-            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
               <FiLinkedin className="w-5 h-5" />
             </a>
           </div>

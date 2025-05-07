@@ -6,7 +6,7 @@ const Booking = require('../models/BookingModels');
 router.post('/', async (req, res) => {
   try {
     const bookingData = req.body;
-    
+
     // Validation manuelle
     if (!bookingData.service || !bookingData.service.id || !bookingData.service.price) {
       return res.status(400).json({ message: "Les informations du service sont requises" });
@@ -25,10 +25,23 @@ router.post('/', async (req, res) => {
          !bookingData.schedule.selectedDays || bookingData.schedule.selectedDays.length === 0)) {
       return res.status(400).json({ message: "Les dates de début/fin et les jours sont requis pour les réservations répétitives" });
     }
-    
+
     if (!bookingData.client || !bookingData.client.name || !bookingData.client.email || 
         !bookingData.client.phone || !bookingData.client.address) {
       return res.status(400).json({ message: "Toutes les informations client sont requises" });
+    }
+
+    // ✨ Normalisation des dates pour supprimer l'heure
+    if (bookingData.schedule.selectedDate) {
+      bookingData.schedule.selectedDate = new Date(bookingData.schedule.selectedDate).toISOString().split('T')[0];
+    }
+
+    if (bookingData.schedule.startDate) {
+      bookingData.schedule.startDate = new Date(bookingData.schedule.startDate).toISOString().split('T')[0];
+    }
+
+    if (bookingData.schedule.endDate) {
+      bookingData.schedule.endDate = new Date(bookingData.schedule.endDate).toISOString().split('T')[0];
     }
 
     const newBooking = new Booking(bookingData);
