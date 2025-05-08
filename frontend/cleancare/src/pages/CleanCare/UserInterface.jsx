@@ -13,6 +13,7 @@ function UserInterface() {
   const [successMessage, setSuccessMessage] = useState("");
   const [recentBookings, setRecentBookings] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(false);
+  const [acceptedBooking, setAcceptedBooking] = useState(null);
   const [profileData, setProfileData] = useState({
     phone: "",
     address: "",
@@ -170,6 +171,32 @@ function UserInterface() {
     }
   };
 
+  // Modifiez la fonction handleAcceptBooking comme suit:
+  const handleAcceptBooking = async (bookingId) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.put(
+      `http://localhost:5000/api/bookings/${bookingId}/accept`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    
+    // Stocker la réservation acceptée dans l'état
+    setAcceptedBooking(response.data);
+    
+    // Rafraîchir la liste des réservations
+    fetchRecentBookings();
+    
+    // Afficher un message de succès
+    setSuccessMessage("Réservation acceptée avec succès!");
+    setTimeout(() => setSuccessMessage(""), 5000);
+  } catch (error) {
+    console.error("Erreur lors de l'acceptation de la réservation:", error);
+    setSuccessMessage("Erreur lors de l'acceptation de la réservation");
+    setTimeout(() => setSuccessMessage(""), 5000);
+  }
+  };
+
   const fetchRecentBookings = async () => {
     try {
       setLoadingRecent(true);
@@ -190,15 +217,15 @@ function UserInterface() {
         return;
       }
   
-      // Si validé ou client, faire la requête normale
+      // Utiliser la nouvelle route pour les réservations en attente
       const response = await axios.get(
-        "http://localhost:5000/api/bookings/last",
+        "http://localhost:5000/api/bookings/last-pending",
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
       setRecentBookings(response.data);
     } catch (error) {
-      console.error("Erreur lors de la récupération des réservations récentes:", error);
+      console.error("Erreur lors de la récupération des réservations en attente:", error);
     } finally {
       setLoadingRecent(false);
     }
@@ -334,6 +361,92 @@ function UserInterface() {
           </div>
         );
     }
+    {acceptedBooking && (
+      <div className="mt-6 rounded-lg shadow p-6" style={{ backgroundColor: colors.textLight }}>
+        <h3 className="text-xl font-semibold mb-4 flex items-center" style={{ color: colors.primary }}>
+          <FaCalendarAlt className="mr-2" /> Réservation Acceptée
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Informations du client */}
+          <div className="border p-4 rounded-lg" style={{ borderColor: colors.lightBlue }}>
+            <h4 className="font-medium mb-2 flex items-center">
+              <FaUser className="mr-2" /> Client
+            </h4>
+            <p className="text-lg font-semibold">{acceptedBooking.client.name}</p>
+            <p className="text-sm" style={{ color: colors.secondary }}>
+              {acceptedBooking.client.email}
+            </p>
+            <p className="text-sm mt-2">
+              <FaPhone className="inline mr-2" /> {acceptedBooking.client.phone || 'Non renseigné'}
+            </p>
+          </div>
+          
+          {/* Informations du service */}
+          <div className="border p-4 rounded-lg" style={{ borderColor: colors.lightBlue }}>
+            <h4 className="font-medium mb-2 flex items-center">
+              <FcServices className="mr-2" /> Service
+            </h4>
+            <p className="text-lg font-semibold">{acceptedBooking.service.name}</p>
+            <p className="text-sm mt-2">{acceptedBooking.service.description}</p>
+            <p className="text-lg font-bold mt-2" style={{ color: colors.primary }}>
+              {acceptedBooking.totalPrice} MAD
+            </p>
+          </div>
+          
+          {/* Détails de la réservation */}
+          <div className="border p-4 rounded-lg" style={{ borderColor: colors.lightBlue }}>
+            <h4 className="font-medium mb-2 flex items-center">
+              <FaCalendarAlt className="mr-2" /> Détails
+            </h4>
+            
+            {acceptedBooking.schedule.frequency === 'une seule fois' ? (
+              <div>
+                <p className="font-medium">Date unique:</p>
+                <p>
+                  {new Date(acceptedBooking.schedule.selectedDate).toLocaleDateString("fr-FR", {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+                <p className="mt-2">
+                  Heure: {acceptedBooking.schedule.selectedTime}
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="font-medium">Période:</p>
+                <p>
+                  Du {new Date(acceptedBooking.schedule.startDate).toLocaleDateString("fr-FR")}
+                  <br />
+                  Au {new Date(acceptedBooking.schedule.endDate).toLocaleDateString("fr-FR")}
+                </p>
+                <p className="mt-2">
+                  Jours: {acceptedBooking.schedule.selectedDays.join(', ')}
+                </p>
+                <p>
+                  Heure: {acceptedBooking.schedule.selectedTime}
+                </p>
+              </div>
+            )}
+            
+            <p className="mt-2 text-sm">
+              Statut: <span className="font-medium" style={{ color: colors.success }}>Acceptée</span>
+            </p>
+          </div>
+        </div>
+        
+        <div className="mt-4 p-4 rounded-lg" style={{ backgroundColor: colors.highlight }}>
+          <h4 className="font-medium mb-2">Instructions:</h4>
+          <p>Contactez le client pour confirmer les détails du service.</p>
+          <p className="mt-2">
+            <FaPhone className="inline mr-2" /> {acceptedBooking.client.phone || 'Demandez au client son numéro de téléphone'}
+          </p>
+        </div>
+      </div>
+    )}
   };
 
   return (
@@ -556,126 +669,121 @@ function UserInterface() {
               {renderRoleSpecificContent()}
               {user?.role === "provider" && (
                 <div
-                  className="mt-6 rounded-lg shadow p-6"
-                  style={{ backgroundColor: colors.textLight }}
+                className="mt-6 rounded-lg shadow p-6"
+                style={{ backgroundColor: colors.textLight }}
                 >
                   <h3
-                    className="text-xl font-semibold mb-4"
-                    style={{ color: colors.textDark }}
+                  className="text-xl font-semibold mb-4"
+                  style={{ color: colors.textDark }}
                   >
-                    Activité Récente
+                    Réservations en attente
                   </h3>
                   <div className="space-y-4">
-                  {!user.validated ? (
-                    <div className="text-center py-4">
-        <p style={{ color: colors.secondary }}>
-          Votre compte prestataire est en attente de validation par l'administration.
+                    {!user.validated ? (
+                      <div className="text-center py-4">
+                        <p style={{ color: colors.secondary }}>
+                          Votre compte prestataire est en attente de validation par l'administration.
+          </p>
+          <p style={{ color: colors.secondary }}>
+            Vous pourrez voir vos réservations une fois votre compte validé.
+          </p>
+        </div>
+      ) : loadingRecent ? (
+        <div className="flex justify-center items-center py-4">
+          <div
+            className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2"
+            style={{ borderColor: colors.primary }}
+          ></div>
+        </div>
+      ) : recentBookings.length === 0 ? (
+        <p
+          className="text-center py-4"
+          style={{ color: colors.secondary }}
+        >
+          Aucune réservation en attente
         </p>
-        <p style={{ color: colors.secondary }}>
-          Vous pourrez voir vos réservations une fois votre compte validé.
-        </p>
-      </div>
-    ) : loadingRecent ? (
-                      <div className="flex justify-center items-center py-4">
-                        <div
-                          className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2"
-                          style={{ borderColor: colors.primary }}
-                        ></div>
-                      </div>
-                    ) : recentBookings.length === 0 ? (
-                      <p
-                        className="text-center py-4"
-                        style={{ color: colors.secondary }}
-                      >
-                        Aucune activité récente
-                      </p>
-                    ) : (
-                      recentBookings.map((booking) => (
-                        <div
-                          key={booking._id}
-                          className="p-4 rounded-lg border flex items-start"
-                          style={{
-                            borderColor: colors.lightBlue,
-                            backgroundColor: colors.highlight,
-                          }}
-                        >
-                          <div
-                            className="p-2 rounded-full mr-3"
-                            style={{ backgroundColor: colors.lightBlue }}
-                          >
-                            <FaCalendarAlt style={{ color: colors.primary }} />
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex justify-between">
-                              <h4
-                                className="font-medium"
-                                style={{ color: colors.textDark }}
-                              >
-                                {booking.service.name}
-                              </h4>
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full ${
-                                  booking.status === "completed"
-                                    ? "bg-green-100 text-green-800"
-                                    : booking.status === "in_progress"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : "bg-gray-100 text-gray-800"
-                                }`}
-                              >
-                                {booking.status === "completed"
-                                  ? "Terminé"
-                                  : booking.status === "in_progress"
-                                  ? "En cours"
-                                  : "En attente"}
-                              </span>
-                            </div>
-                            <p
-                              className="text-sm mt-1"
-                              style={{ color: colors.secondary }}
-                            >
-                              Client: {booking.client.name}
-                            </p>
-                            <p
-                              className="text-sm"
-                              style={{ color: colors.textDark }}
-                            >
-                              {new Date(
-                                booking.schedule.selectedDate ||
-                                  booking.schedule.startDate
-                              ).toLocaleDateString("fr-FR", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </p>
-                            <div className="mt-2 flex justify-between items-center">
-                              <span
-                                className="text-sm font-medium"
-                                style={{ color: colors.primary }}
-                              >
-                                {booking.service.price} €
-                              </span>
-                              <button
-                                onClick={() =>
-                                  navigate(`/bookings/${booking._id}`)
-                                }
-                                className="text-sm px-3 py-1 rounded"
-                                style={{
-                                  backgroundColor: colors.primary,
-                                  color: colors.textLight,
-                                }}
-                              >
-                                Voir détails
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
+      ) : (
+        recentBookings.map((booking) => (
+          <div
+            key={booking._id}
+            className="p-4 rounded-lg border flex items-start"
+            style={{
+              borderColor: colors.lightBlue,
+              backgroundColor: colors.highlight,
+            }}
+          >
+            <div
+              className="p-2 rounded-full mr-3"
+              style={{ backgroundColor: colors.lightBlue }}
+            >
+              <FaCalendarAlt style={{ color: colors.primary }} />
+            </div>
+            <div className="flex-1">
+              <div className="flex justify-between">
+                <h4
+                  className="font-medium"
+                  style={{ color: colors.textDark }}
+                >
+                  {booking.service.name}
+                </h4>
+                <span
+                  className="text-xs px-2 py-1 rounded-full bg-gray-100 text-gray-800"
+                >
+                  En attente
+                </span>
+              </div>
+              <p
+                className="text-sm mt-1"
+                style={{ color: colors.secondary }}
+              >
+                Client: {booking.client.name}
+              </p>
+              
+              {/* Affichage des dates */}
+              {booking.schedule.frequency === 'une seule fois' ? (
+                <p className="text-sm" style={{ color: colors.textDark }}>
+                  <strong>Date:</strong> {new Date(booking.schedule.selectedDate).toLocaleDateString("fr-FR", {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              ) : (
+                <div className="text-sm" style={{ color: colors.textDark }}>
+                  <p><strong>Début:</strong> {new Date(booking.schedule.startDate).toLocaleDateString("fr-FR")}</p>
+                  <p><strong>Fin:</strong> {new Date(booking.schedule.endDate).toLocaleDateString("fr-FR")}</p>
+                  <p><strong>Jours:</strong> {booking.schedule.selectedDays.join(', ')}</p>
                 </div>
               )}
+              
+              <div className="mt-2 flex justify-between items-center">
+                <span
+                  className="text-sm font-medium"
+                  style={{ color: colors.primary }}
+                >
+                  {booking.totalPrice} MAD
+                </span>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => handleAcceptBooking(booking._id)}
+                    className="text-sm px-3 py-1 rounded"
+                    style={{
+                      backgroundColor: colors.primary,
+                      color: colors.textLight,
+                    }}
+                  >
+                    Je prends cette réservation
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
+)}
             </>
           )}
 

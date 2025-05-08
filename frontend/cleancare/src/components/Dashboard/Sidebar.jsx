@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { 
   FiUsers, FiLogOut, FiMessageSquare, FiSettings, 
   FiShoppingCart, FiHome, FiPlusSquare, FiUser, 
-  FiClipboard, FiChevronsLeft, FiChevronsRight 
+  FiClipboard, FiChevronsLeft, FiChevronsRight
 } from "react-icons/fi";
 
 function Sidebar() {

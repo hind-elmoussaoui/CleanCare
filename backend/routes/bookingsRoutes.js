@@ -101,6 +101,21 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+// Récupérer les dernières réservations en attente (pour les prestataires)
+router.get('/last-pending', async (req, res) => {
+  try {
+    const lastPendingBookings = await Booking.find({ status: 'confirmed' })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate('service', 'name description')
+      .populate('client', 'name email phone');
+      
+    res.json(lastPendingBookings);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des réservations en attente" });
+  }
+});
+
 // Récupérer les dernières réservations
 router.get('/last', async (req, res) => {
   try {
@@ -113,6 +128,22 @@ router.get('/last', async (req, res) => {
     res.json(lastBookings);
   } catch (error) {
     res.status(500).json({ message: "Erreur lors de la récupération des dernières réservations" });
+  }
+});
+
+router.put('/:id/accept', async (req, res) => {
+  try {
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id, 
+      { status: 'in_progress' }, 
+      { new: true }
+    );
+    if (!booking) {
+      return res.status(404).json({ error: 'Réservation non trouvée' });
+    }
+    res.json(booking);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
   }
 });
 

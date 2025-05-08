@@ -98,10 +98,16 @@ function FooterDash() {
 
           {/* Social Links */}
           <div className="flex mt-4 space-x-6 sm:mt-0">
-            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+            <a href="https://github.com/hind-elmoussaoui"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
               <FiGithub className="w-5 h-5" />
             </a>
-            <a href="#" className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
+            <a href="https://www.linkedin.com/in/el-moussaoui-hind-8375182b5"
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400">
               <FiLinkedin className="w-5 h-5" />
             </a>
           </div>

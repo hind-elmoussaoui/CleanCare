@@ -302,6 +302,49 @@ router.get('/stats', async (req, res) => {
   }
 }); 
 
+// Récupérer les prestataires avec réservations acceptées
+router.get('/providers-with-bookings', async (req, res) => {
+  try {
+    // Trouver les prestataires qui ont au moins une réservation acceptée
+    const providers = await User.aggregate([
+      {
+        $match: {
+          role: 'provider',
+          validated: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: '_id',
+          foreignField: 'provider',
+          as: 'bookings'
+        }
+      },
+      {
+        $match: {
+          'bookings.status': 'confirmed'
+        }
+      },
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          phone: 1,
+          company: 1,
+          bookingCount: { $size: '$bookings' },
+          lastBookingDate: { $max: '$bookings.createdAt' }
+        }
+      },
+      { $sort: { bookingCount: -1 } }
+    ]);
+
+    res.json(providers);
+  } catch (error) {
+    res.status(500).json({ message: "Erreur lors de la récupération des prestataires" });
+  }
+});
+
 // GET /api/users/:id - Récupère un utilisateur spécifique
 router.get("/:id", async (req, res) => {
   try {
@@ -315,7 +358,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Dans votre backend (api/users.js)
+
 // GET /api/users
 router.get('/', async (req, res) => {
   try {
@@ -336,7 +379,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 // Route pour obtenir tous les fournisseurs
 router.get("/", async (req, res) => {

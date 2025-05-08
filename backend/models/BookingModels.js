@@ -32,6 +32,12 @@ const bookingSchema = new mongoose.Schema({
     default: 'pending',
     enum: [ 'pending', 'confirmed', 'in_progress', 'completed', 'cancelled'] 
   },
+  acceptedBy: {
+    providerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    providerName: String,
+    company: String,
+    acceptedAt: Date
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
